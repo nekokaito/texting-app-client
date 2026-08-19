@@ -78,7 +78,7 @@ export default function OTP() {
         }}
       />
 
-      <Text style={styles.title}>Verify your phone number</Text>
+      <Text style={styles.title}>Verify your phone number </Text>
 
       <Text style={styles.legal}>
         We have sent you an SMS with a code to the number above.
@@ -113,7 +113,7 @@ export default function OTP() {
 
       <TouchableOpacity style={styles.resendButton} onPress={resendCode}>
         <Text style={styles.resendText}>
-          Didn&apos;t receive a verification code?
+          Didn&apos;t receive a verification code? Resend
         </Text>
       </TouchableOpacity>
     </View>
@@ -132,7 +132,7 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 24,
     fontWeight: "600",
-    marginTop: 20,
+    marginTop: 50,
     color: "#000000",
   },
 
@@ -181,5 +181,6 @@ const styles = StyleSheet.create({
   resendText: {
     color: "#dfbf30",
     fontSize: 17,
+    textAlign: "center",
   },
 });

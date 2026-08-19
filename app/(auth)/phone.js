@@ -69,10 +69,10 @@ const PhoneNumberScreen = () => {
         {/* Phone Input */}
         <View style={styles.phoneBox}>
           <TouchableOpacity style={styles.countryRow}>
-            <Text style={styles.countryName}>Bangladesh</Text>
+            <Text style={styles.countryName}>Bangladesh.</Text>
 
             <View style={styles.countryRight}>
-              <Text style={styles.countryCode}>+880</Text>
+              <Text style={styles.countryCode}>+880.</Text>
 
               <Ionicons name="chevron-forward" size={20} color={Colors.gray} />
             </View>
@@ -117,7 +117,7 @@ const PhoneNumberScreen = () => {
             <Text
               style={[styles.buttonText, isValid && styles.buttonTextEnabled]}
             >
-              Next
+              Next.
             </Text>
           </TouchableOpacity>
         </View>
@@ -142,12 +142,14 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "space-between",
     marginBottom: 35,
+    marginTop: 20,
   },
 
   headerTitle: {
     fontSize: 20,
     fontWeight: "600",
     color: "#000",
+    marginTop: 20,
   },
 
   description: {
