@@ -1,4 +1,4 @@
-import { Stack, useLocalSearchParams } from "expo-router";
+import { Stack, useLocalSearchParams, useRouter } from "expo-router";
 import { useEffect, useState } from "react";
 import { Alert, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
@@ -70,6 +70,8 @@ export default function OTP() {
     }
   };
 
+  const router = useRouter();
+
   return (
     <View style={styles.container}>
       <Stack.Screen
@@ -78,7 +80,7 @@ export default function OTP() {
         }}
       />
 
-      <Text style={styles.title}>Verify your phone number </Text>
+      <Text style={styles.title}>Verify your phone number.</Text>
 
       <Text style={styles.legal}>
         We have sent you an SMS with a code to the number above.
@@ -115,6 +117,13 @@ export default function OTP() {
         <Text style={styles.resendText}>
           Didn&apos;t receive a verification code? Resend
         </Text>
+      </TouchableOpacity>
+
+      <TouchableOpacity
+        style={styles.chatButton}
+        onPress={() => router.push("/(tabs)/chats")}
+      >
+        <Text style={styles.chatButtonText}>Go to Chats</Text>
       </TouchableOpacity>
     </View>
   );
@@ -182,5 +191,20 @@ const styles = StyleSheet.create({
     color: "#dfbf30",
     fontSize: 17,
     textAlign: "center",
+  },
+
+  chatButton: {
+    width: "100%",
+    backgroundColor: "#ca982d",
+    paddingVertical: 14,
+    borderRadius: 10,
+    alignItems: "center",
+    marginTop: 10,
+  },
+
+  chatButtonText: {
+    color: "#FFFFFF",
+    fontSize: 17,
+    fontWeight: "600",
   },
 });

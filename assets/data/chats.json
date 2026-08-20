@@ -1,0 +1,218 @@
+[
+  {
+    "chat_id": 1001,
+    "chat_type": "PRIVATE",
+    "created_at": "2026-08-15T14:20:00",
+    "created_by": 101,
+    "members": [
+      {
+        "user_id": 101,
+        "username": "arif_rahman",
+        "display_name": "Arif Rahman",
+        "profile_image": "https://i.pravatar.cc/150?img=12",
+        "joined_at": "2026-08-15T14:20:00"
+      },
+      {
+        "user_id": 102,
+        "username": "nusrat_jahan",
+        "display_name": "Nusrat Jahan",
+        "profile_image": "https://i.pravatar.cc/150?img=47",
+        "joined_at": "2026-08-15T14:20:00"
+      }
+    ],
+    "last_message": {
+      "message_id": 5001,
+      "sender_id": 102,
+      "content": "Hey, are you coming tomorrow?",
+      "message_type": "TEXT",
+      "created_at": "2026-08-20T20:45:00"
+    },
+    "message_status": {
+      "message_id": 5001,
+      "user_id": 101,
+      "status": "READ",
+      "updated_at": "2026-08-20T20:46:00"
+    },
+    "unread_count": 0
+  },
+  {
+    "chat_id": 1002,
+    "chat_type": "PRIVATE",
+    "created_at": "2026-08-14T11:30:00",
+    "created_by": 101,
+    "members": [
+      {
+        "user_id": 101,
+        "username": "shamsul",
+        "display_name": "Shamsul",
+        "profile_image": "https://i.pravatar.cc/150?img=3",
+        "joined_at": "2026-08-14T11:30:00"
+      },
+      {
+        "user_id": 103,
+        "username": "tanvir_ahmed",
+        "display_name": "Tanvir Ahmed",
+        "profile_image": "https://i.pravatar.cc/150?img=33",
+        "joined_at": "2026-08-14T11:30:00"
+      }
+    ],
+    "last_message": {
+      "message_id": 5002,
+      "sender_id": 103,
+      "content": "Let's meet at 5 PM.",
+      "message_type": "TEXT",
+      "created_at": "2026-08-20T17:18:00"
+    },
+    "message_status": {
+      "message_id": 5002,
+      "user_id": 101,
+      "status": "READ",
+      "updated_at": "2026-08-20T17:20:00"
+    },
+    "unread_count": 0
+  },
+  {
+    "chat_id": 1003,
+    "chat_type": "PRIVATE",
+    "created_at": "2026-08-12T09:15:00",
+    "created_by": 101,
+    "members": [
+      {
+        "user_id": 101,
+        "username": "shamsul",
+        "display_name": "Shamsul",
+        "profile_image": "https://i.pravatar.cc/150?img=3",
+        "joined_at": "2026-08-12T09:15:00"
+      },
+      {
+        "user_id": 104,
+        "username": "sadia_islam",
+        "display_name": "Sadia Islam",
+        "profile_image": "https://i.pravatar.cc/150?img=44",
+        "joined_at": "2026-08-12T09:15:00"
+      }
+    ],
+    "last_message": {
+      "message_id": 5003,
+      "sender_id": 104,
+      "content": "Did you finish the assignment?",
+      "message_type": "TEXT",
+      "created_at": "2026-08-19T22:10:00"
+    },
+    "message_status": {
+      "message_id": 5003,
+      "user_id": 101,
+      "status": "DELIVERED",
+      "updated_at": "2026-08-19T22:11:00"
+    },
+    "unread_count": 1
+  },
+  {
+    "chat_id": 1004,
+    "chat_type": "PRIVATE",
+    "created_at": "2026-08-10T18:00:00",
+    "created_by": 105,
+    "members": [
+      {
+        "user_id": 101,
+        "username": "shamsul",
+        "display_name": "Shamsul",
+        "profile_image": "https://i.pravatar.cc/150?img=3",
+        "joined_at": "2026-08-10T18:05:00"
+      },
+      {
+        "user_id": 105,
+        "username": "rakib_hasan",
+        "display_name": "Rakib Hasan",
+        "profile_image": "https://i.pravatar.cc/150?img=11",
+        "joined_at": "2026-08-10T18:00:00"
+      }
+    ],
+    "last_message": {
+      "message_id": 5004,
+      "sender_id": 101,
+      "content": "That sounds good. See you later!",
+      "message_type": "TEXT",
+      "created_at": "2026-08-19T18:40:00"
+    },
+    "message_status": {
+      "message_id": 5004,
+      "user_id": 101,
+      "status": "READ",
+      "updated_at": "2026-08-19T18:40:05"
+    },
+    "unread_count": 0
+  },
+  {
+    "chat_id": 1005,
+    "chat_type": "PRIVATE",
+    "created_at": "2026-08-08T13:40:00",
+    "created_by": 101,
+    "members": [
+      {
+        "user_id": 101,
+        "username": "shamsul",
+        "display_name": "Shamsul",
+        "profile_image": "https://i.pravatar.cc/150?img=3",
+        "joined_at": "2026-08-08T13:40:00"
+      },
+      {
+        "user_id": 106,
+        "username": "mehedi_hasan",
+        "display_name": "Mehedi Hasan",
+        "profile_image": "https://i.pravatar.cc/150?img=15",
+        "joined_at": "2026-08-08T13:40:00"
+      }
+    ],
+    "last_message": {
+      "message_id": 5005,
+      "sender_id": 106,
+      "content": "Can you check the database schema?",
+      "message_type": "TEXT",
+      "created_at": "2026-08-18T21:25:00"
+    },
+    "message_status": {
+      "message_id": 5005,
+      "user_id": 101,
+      "status": "READ",
+      "updated_at": "2026-08-18T21:26:00"
+    },
+    "unread_count": 0
+  },
+  {
+    "chat_id": 1006,
+    "chat_type": "PRIVATE",
+    "created_at": "2026-08-05T16:20:00",
+    "created_by": 107,
+    "members": [
+      {
+        "user_id": 101,
+        "username": "shamsul",
+        "display_name": "Shamsul",
+        "profile_image": "https://i.pravatar.cc/150?img=3",
+        "joined_at": "2026-08-05T16:25:00"
+      },
+      {
+        "user_id": 107,
+        "username": "fahim_chowdhury",
+        "display_name": "Fahim Chowdhury",
+        "profile_image": "https://i.pravatar.cc/150?img=68",
+        "joined_at": "2026-08-05T16:20:00"
+      }
+    ],
+    "last_message": {
+      "message_id": 5006,
+      "sender_id": 107,
+      "content": "I'll call you when I get home.",
+      "message_type": "TEXT",
+      "created_at": "2026-08-18T16:05:00"
+    },
+    "message_status": {
+      "message_id": 5006,
+      "user_id": 101,
+      "status": "DELIVERED",
+      "updated_at": "2026-08-18T16:06:00"
+    },
+    "unread_count": 1
+  }
+]
