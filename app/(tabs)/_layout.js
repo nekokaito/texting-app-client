@@ -7,6 +7,8 @@ import { Tabs, useSegments } from "expo-router";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import Colors from "../../constants/Colors";
 
+//Tab layout for the app, this is where we define the tabs and their icons, as well as some styling for the tab bar and headers. The useSegments hook is used to determine the current route segment, which allows us to conditionally hide the tab bar on certain screens (like when viewing a specific chat).
+
 export default function TabsLayout() {
   const segments = useSegments();
 
