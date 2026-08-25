@@ -1,17 +1,28 @@
 import { Ionicons } from "@expo/vector-icons";
-import { Link, Stack } from "expo-router";
+import { Link, Stack, useLocalSearchParams } from "expo-router";
+
 import { Image, Text, TouchableOpacity, View } from "react-native";
+
 import Colors from "../../../constants/Colors";
+
+import chats from "../../../assets/data/chats.json";
 
 export default function ChatsLayout() {
   return (
     <Stack>
+      {/* =========================
+          CHAT LIST
+      ========================= */}
+
       <Stack.Screen
         name="index"
         options={{
           title: "Chats",
+
           headerLargeTitle: true,
+
           headerTransparent: true,
+
           headerBlurEffect: "regular",
 
           headerLeft: () => (
@@ -61,67 +72,37 @@ export default function ChatsLayout() {
         }}
       />
 
+      {/* =========================
+          INDIVIDUAL CHAT
+      ========================= */}
+
       <Stack.Screen
         name="[id]"
         options={{
           title: "",
+
           headerBackTitleVisible: false,
 
-          headerTitle: () => (
-            <View
-              style={{
-                flexDirection: "row",
-                alignItems: "center",
-                gap: 10,
-                paddingBottom: 4,
-              }}
-            >
-              <Image
-                source={{
-                  uri: "https://i.pravatar.cc/150?img=12",
-                }}
-                style={{
-                  width: 40,
-                  height: 40,
-                  borderRadius: 50,
-                }}
-              />
+          headerTitle: () => <ChatHeader />,
 
-              <Text
-                style={{
-                  fontSize: 16,
-                  fontWeight: "500",
-                }}
-              >
-                Chat
-              </Text>
-            </View>
-          ),
+          headerRight: () => <ChatInfoButton />,
 
-          headerRight: () => (
-            <View
-              style={{
-                flexDirection: "row",
-                gap: 30,
-              }}
-            >
-              <TouchableOpacity>
-                <Ionicons
-                  name="videocam-outline"
-                  color={Colors.primary}
-                  size={30}
-                />
-              </TouchableOpacity>
+          headerStyle: {
+            backgroundColor: Colors.background,
+          },
+        }}
+      />
 
-              <TouchableOpacity>
-                <Ionicons
-                  name="call-outline"
-                  color={Colors.primary}
-                  size={30}
-                />
-              </TouchableOpacity>
-            </View>
-          ),
+      {/* =========================
+          CHAT INFO
+      ========================= */}
+
+      <Stack.Screen
+        name="info/[id]"
+        options={{
+          title: "Info",
+
+          headerBackTitleVisible: false,
 
           headerStyle: {
             backgroundColor: Colors.background,
@@ -129,5 +110,83 @@ export default function ChatsLayout() {
         }}
       />
     </Stack>
+  );
+}
+
+/* =================================
+   CHAT HEADER
+================================= */
+
+function ChatHeader() {
+  const { id } = useLocalSearchParams();
+
+  const currentChat = chats.find((chat) => String(chat.chat_id) === String(id));
+
+  const currentUserId = 101;
+
+  const otherUser = currentChat?.members?.find(
+    (member) => member.user_id !== currentUserId,
+  );
+
+  return (
+    <View
+      style={{
+        flexDirection: "row",
+        alignItems: "center",
+        gap: 10,
+        paddingBottom: 4,
+      }}
+    >
+      <Image
+        source={{
+          uri: otherUser?.profile_image || "https://i.pravatar.cc/150?img=12",
+        }}
+        style={{
+          width: 40,
+          height: 40,
+          borderRadius: 50,
+        }}
+      />
+
+      <View>
+        <Text
+          style={{
+            fontSize: 16,
+            fontWeight: "600",
+            color: "#000",
+          }}
+        >
+          {otherUser?.display_name || "User"}
+        </Text>
+      </View>
+    </View>
+  );
+}
+
+/* =================================
+   INFO BUTTON
+================================= */
+
+function ChatInfoButton() {
+  const { id } = useLocalSearchParams();
+
+  return (
+    <Link
+      href={{
+        pathname: "/(tabs)/chats/info/[id]",
+        params: {
+          id: id,
+        },
+      }}
+      asChild
+    >
+      <TouchableOpacity>
+        <Ionicons
+          name="information-circle-outline"
+          color={Colors.primary}
+          size={30}
+        />
+      </TouchableOpacity>
+    </Link>
   );
 }

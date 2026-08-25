@@ -5,7 +5,7 @@ import {
   Alert,
   FlatList,
   ImageBackground,
-  KeyboardAvoidingView,
+  Keyboard,
   Platform,
   Pressable,
   StyleSheet,
@@ -29,35 +29,54 @@ export default function ChatPage() {
   const [messages, setMessages] = useState([]);
   const [text, setText] = useState("");
   const [replyMessage, setReplyMessage] = useState(null);
+  const [keyboardHeight, setKeyboardHeight] = useState(0);
 
   const flatListRef = useRef(null);
 
-  /*
-   * Find the current CHAT.
-   *
-   * CHAT.CHAT_ID
-   */
   const currentChat = chats.find((chat) => String(chat.chat_id) === String(id));
 
-  /*
-   * Find the other member of the private chat.
-   *
-   * CHAT_MEMBER → USERS
-   */
   const otherUser = currentChat?.members?.find(
     (member) => member.user_id !== CURRENT_USER_ID,
   );
 
+  /*
+   * Keyboard
+   */
+  useEffect(() => {
+    const showEvent =
+      Platform.OS === "ios" ? "keyboardWillShow" : "keyboardDidShow";
+
+    const hideEvent =
+      Platform.OS === "ios" ? "keyboardWillHide" : "keyboardDidHide";
+
+    const showSubscription = Keyboard.addListener(showEvent, (event) => {
+      setKeyboardHeight(event.endCoordinates.height);
+
+      setTimeout(() => {
+        flatListRef.current?.scrollToEnd({
+          animated: true,
+        });
+      }, 100);
+    });
+
+    const hideSubscription = Keyboard.addListener(hideEvent, () => {
+      setKeyboardHeight(0);
+    });
+
+    return () => {
+      showSubscription.remove();
+      hideSubscription.remove();
+    };
+  }, []);
+
+  /*
+   * Load messages for current CHAT
+   */
   useEffect(() => {
     if (!currentChat) {
       return;
     }
 
-    /*
-     * Get MESSAGE records belonging to this chat.
-     *
-     * MESSAGE.CHAT_ID → CHAT.CHAT_ID
-     */
     const chatMessages = messagesData
       .filter(
         (message) => String(message.chat_id) === String(currentChat.chat_id),
@@ -69,17 +88,11 @@ export default function ChatPage() {
 
   /*
    * Send message
-   *
-   * For now:
-   * MESSAGE is added locally.
-   *
-   * Later:
-   * INSERT into Oracle MESSAGE table through API.
    */
   const sendMessage = () => {
     const trimmedText = text.trim();
 
-    if (!trimmedText) {
+    if (!trimmedText || !currentChat) {
       return;
     }
 
@@ -95,6 +108,7 @@ export default function ChatPage() {
     setMessages((previousMessages) => [...previousMessages, newMessage]);
 
     setText("");
+    setReplyMessage(null);
 
     setTimeout(() => {
       flatListRef.current?.scrollToEnd({
@@ -104,33 +118,31 @@ export default function ChatPage() {
   };
 
   /*
-   * Long press message → reply
+   * Long press → reply
    */
   const handleMessageLongPress = (message) => {
     setReplyMessage(message);
   };
 
   /*
-   * Cancel reply
+   * Clear reply
    */
   const clearReply = () => {
     setReplyMessage(null);
   };
 
   /*
-   * Format message time
+   * Format time
    */
   const formatTime = (date) => {
-    const messageDate = new Date(date);
-
-    return messageDate.toLocaleTimeString([], {
+    return new Date(date).toLocaleTimeString([], {
       hour: "2-digit",
       minute: "2-digit",
     });
   };
 
   /*
-   * Render individual MESSAGE
+   * Render message
    */
   const renderMessage = ({ item }) => {
     const isMine = item.sender_id === CURRENT_USER_ID;
@@ -160,16 +172,6 @@ export default function ChatPage() {
             </Text>
           )}
 
-          {replyMessage && replyMessage.message_id === item.message_id && (
-            <View style={styles.replyPreviewInside}>
-              <Text style={styles.replyPreviewName}>Replying</Text>
-
-              <Text numberOfLines={1} style={styles.replyPreviewText}>
-                {replyMessage.content}
-              </Text>
-            </View>
-          )}
-
           <View style={styles.messageContentRow}>
             <Text
               style={[
@@ -194,9 +196,6 @@ export default function ChatPage() {
     );
   };
 
-  /*
-   * If chat doesn't exist
-   */
   if (!currentChat) {
     return (
       <View style={styles.errorContainer}>
@@ -205,17 +204,27 @@ export default function ChatPage() {
     );
   }
 
+  /*
+   * Extra spacing for Android.
+   *
+   * Your screenshot shows the keyboard
+   * covering the bottom of the composer,
+   * so we add a small safe gap.
+   */
+  const composerBottom =
+    Platform.OS === "android" ? keyboardHeight + 20 : keyboardHeight;
+
   return (
-    <KeyboardAvoidingView
-      style={styles.container}
-      behavior={Platform.OS === "ios" ? "padding" : undefined}
-      keyboardVerticalOffset={Platform.OS === "ios" ? 90 : 0}
-    >
+    <View style={styles.container}>
       <ImageBackground
         source={require("../../../assets/images/pattern.png")}
         style={styles.chatBackground}
         imageStyle={styles.backgroundImage}
       >
+        {/* =========================
+            MESSAGE LIST
+        ========================= */}
+
         <FlatList
           ref={flatListRef}
           data={messages}
@@ -223,89 +232,113 @@ export default function ChatPage() {
           renderItem={renderMessage}
           contentContainerStyle={styles.messageList}
           showsVerticalScrollIndicator={false}
-          onContentSizeChange={() =>
+          keyboardShouldPersistTaps="handled"
+          keyboardDismissMode="on-drag"
+          onContentSizeChange={() => {
             flatListRef.current?.scrollToEnd({
               animated: false,
-            })
-          }
+            });
+          }}
         />
 
-        {replyMessage && (
-          <View style={styles.replyBar}>
-            <View style={styles.replyIndicator} />
+        {/* =========================
+            COMPOSER
+        ========================= */}
 
-            <View style={styles.replyContent}>
-              <Text style={styles.replyTitle}>
-                {replyMessage.sender_id === CURRENT_USER_ID
-                  ? "You"
-                  : otherUser?.display_name || "User"}
-              </Text>
+        <View
+          style={[
+            styles.composerContainer,
+            {
+              bottom: composerBottom,
+            },
+          ]}
+        >
+          {/* Reply bar */}
 
-              <Text numberOfLines={1} style={styles.replyText}>
-                {replyMessage.content}
-              </Text>
+          {replyMessage && (
+            <View style={styles.replyBar}>
+              <View style={styles.replyIndicator} />
+
+              <View style={styles.replyContent}>
+                <Text style={styles.replyTitle}>
+                  {replyMessage.sender_id === CURRENT_USER_ID
+                    ? "You"
+                    : otherUser?.display_name || "User"}
+                </Text>
+
+                <Text numberOfLines={1} style={styles.replyText}>
+                  {replyMessage.content}
+                </Text>
+              </View>
+
+              <Pressable onPress={clearReply} style={styles.closeReplyButton}>
+                <Ionicons name="close-circle" size={27} color={Colors.gray} />
+              </Pressable>
             </View>
-
-            <Pressable onPress={clearReply} style={styles.closeReplyButton}>
-              <Ionicons name="close-circle" size={27} color={Colors.gray} />
-            </Pressable>
-          </View>
-        )}
-
-        <View style={styles.inputContainer}>
-          <Pressable
-            style={styles.addButton}
-            onPress={() =>
-              Alert.alert(
-                "Attachments",
-                "Attachment options will be added later.",
-              )
-            }
-          >
-            <Ionicons name="add" size={27} color={Colors.primary} />
-          </Pressable>
-
-          <TextInput
-            value={text}
-            onChangeText={setText}
-            placeholder="Message"
-            placeholderTextColor={Colors.gray}
-            multiline
-            style={styles.textInput}
-          />
-
-          {text.trim().length === 0 ? (
-            <>
-              <Pressable
-                style={styles.inputIcon}
-                onPress={() =>
-                  Alert.alert("Camera", "Camera will be added later.")
-                }
-              >
-                <Ionicons
-                  name="camera-outline"
-                  size={27}
-                  color={Colors.primary}
-                />
-              </Pressable>
-
-              <Pressable
-                style={styles.inputIcon}
-                onPress={() =>
-                  Alert.alert("Voice", "Voice recording will be added later.")
-                }
-              >
-                <Ionicons name="mic-outline" size={27} color={Colors.primary} />
-              </Pressable>
-            </>
-          ) : (
-            <Pressable style={styles.sendButton} onPress={sendMessage}>
-              <Ionicons name="send" size={22} color="#fff" />
-            </Pressable>
           )}
+
+          {/* Input */}
+
+          <View style={styles.inputContainer}>
+            <Pressable
+              style={styles.addButton}
+              onPress={() =>
+                Alert.alert(
+                  "Attachments",
+                  "Attachment options will be added later.",
+                )
+              }
+            >
+              <Ionicons name="add" size={27} color={Colors.primary} />
+            </Pressable>
+
+            <TextInput
+              value={text}
+              onChangeText={setText}
+              placeholder="Message"
+              placeholderTextColor={Colors.gray}
+              multiline
+              textAlignVertical="center"
+              style={styles.textInput}
+            />
+
+            {text.trim().length === 0 ? (
+              <>
+                <Pressable
+                  style={styles.inputIcon}
+                  onPress={() =>
+                    Alert.alert("Camera", "Camera will be added later.")
+                  }
+                >
+                  <Ionicons
+                    name="camera-outline"
+                    size={27}
+                    color={Colors.primary}
+                  />
+                </Pressable>
+
+                <Pressable
+                  style={styles.inputIcon}
+                  onPress={() =>
+                    Alert.alert("Voice", "Voice recording will be added later.")
+                  }
+                >
+                  <Ionicons
+                    name="mic-outline"
+                    size={27}
+                    color={Colors.primary}
+                  />
+                </Pressable>
+              </>
+            ) : (
+              <Pressable style={styles.sendButton} onPress={sendMessage}>
+                <Ionicons name="send" size={22} color="#fff" />
+              </Pressable>
+            )}
+          </View>
         </View>
       </ImageBackground>
-    </KeyboardAvoidingView>
+    </View>
   );
 }
 
@@ -326,7 +359,11 @@ const styles = StyleSheet.create({
   messageList: {
     paddingHorizontal: 10,
     paddingTop: 12,
-    paddingBottom: 10,
+
+    /*
+     * Leave room for the composer.
+     */
+    paddingBottom: 90,
   },
 
   messageRow: {
@@ -399,6 +436,17 @@ const styles = StyleSheet.create({
 
   otherMessageTime: {
     color: Colors.gray,
+  },
+
+  /* =========================
+     COMPOSER
+  ========================= */
+
+  composerContainer: {
+    position: "absolute",
+    left: 0,
+    right: 0,
+    backgroundColor: Colors.background,
   },
 
   replyBar: {
@@ -484,7 +532,12 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     marginLeft: 5,
+    marginBottom: 2,
   },
+
+  /* =========================
+     ERROR
+  ========================= */
 
   errorContainer: {
     flex: 1,
@@ -494,24 +547,6 @@ const styles = StyleSheet.create({
 
   errorText: {
     fontSize: 18,
-    color: Colors.gray,
-  },
-
-  replyPreviewInside: {
-    borderLeftWidth: 3,
-    borderLeftColor: Colors.primary,
-    paddingLeft: 7,
-    marginBottom: 5,
-  },
-
-  replyPreviewName: {
-    fontSize: 12,
-    fontWeight: "600",
-    color: Colors.primary,
-  },
-
-  replyPreviewText: {
-    fontSize: 12,
     color: Colors.gray,
   },
 });

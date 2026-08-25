@@ -33,6 +33,7 @@ export default function ChatRow({ chat }) {
               gap: 14,
               paddingLeft: 20,
               paddingVertical: 10,
+              marginTop: 10,
             }}
           >
             <Image
