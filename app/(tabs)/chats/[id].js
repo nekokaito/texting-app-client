@@ -1,4 +1,4 @@
-import { useLocalSearchParams } from "expo-router";
+import { Stack, useLocalSearchParams, useRouter } from "expo-router";
 import { useEffect, useRef, useState } from "react";
 
 import {
@@ -25,6 +25,7 @@ const CURRENT_USER_ID = 101;
 
 export default function ChatPage() {
   const { id } = useLocalSearchParams();
+  const router = useRouter();
 
   const [messages, setMessages] = useState([]);
   const [text, setText] = useState("");
@@ -216,6 +217,25 @@ export default function ChatPage() {
 
   return (
     <View style={styles.container}>
+      <Stack.Screen
+        options={{
+          headerRight: () => (
+            <Pressable
+              onPress={() => {
+                router.push(`/chats/info/${id}`);
+              }}
+              style={{ padding: 5 }}
+            >
+              <Ionicons
+                name="information-circle-outline"
+                size={30}
+                color={Colors.primary}
+              />
+            </Pressable>
+          ),
+        }}
+      />
+
       <ImageBackground
         source={require("../../../assets/images/pattern.png")}
         style={styles.chatBackground}

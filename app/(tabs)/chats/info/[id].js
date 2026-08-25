@@ -1,4 +1,5 @@
 import { Stack, useLocalSearchParams } from "expo-router";
+
 import {
   Alert,
   Image,
@@ -13,67 +14,33 @@ import { Ionicons } from "@expo/vector-icons";
 
 import Colors from "../../../../constants/Colors";
 
-import chats from "../../../../assets/data/chats.json";
-import messagesData from "../../../../assets/data/messages.json";
-
-const CURRENT_USER_ID = 101;
+import chatInfoData from "../../../../assets/data/chat-info.json";
 
 export default function ChatInfoPage() {
   const { id } = useLocalSearchParams();
 
   /*
-   * Find current chat
-   *
-   * CHAT.CHAT_ID
+   * Find API-style chat information
    */
-  const currentChat = chats.find((chat) => String(chat.chat_id) === String(id));
-
-  /*
-   * Find the other member
-   *
-   * CHAT_MEMBER → USERS
-   */
-  const otherUser = currentChat?.members?.find(
-    (member) => member.user_id !== CURRENT_USER_ID,
+  const chatInfo = chatInfoData.find(
+    (item) => String(item.chat.chat_id) === String(id),
   );
 
   /*
-   * Messages belonging to this chat
-   *
-   * MESSAGE.CHAT_ID
+   * If chat doesn't exist
    */
-  const chatMessages = messagesData.filter(
-    (message) => String(message.chat_id) === String(currentChat?.chat_id),
-  );
-
-  /*
-   * Number of attachments
-   *
-   * Later this will come from ATTACHMENT.
-   */
-  const attachmentCount = chatMessages.filter(
-    (message) => message.message_type && message.message_type !== "TEXT",
-  ).length;
-
-  if (!currentChat || !otherUser) {
+  if (!chatInfo) {
     return (
       <View style={styles.errorContainer}>
-        <Text style={styles.errorText}>User information not found</Text>
+        <Text style={styles.errorText}>Chat information not found</Text>
       </View>
     );
   }
 
-  const profileImage =
-    otherUser.profile_image ||
-    otherUser.img ||
-    otherUser.avatar ||
-    "https://i.pravatar.cc/300?img=12";
+  const { chat, user, message_summary } = chatInfo;
 
-  const displayName = otherUser.display_name || otherUser.name || "User";
-
-  const phone = otherUser.phone_number || otherUser.phone || "";
-
-  const username = otherUser.username || "";
+  console.log("INFO PAGE ID:", id);
+  console.log("CHAT INFO DATA:", chatInfoData);
 
   return (
     <>
@@ -93,70 +60,60 @@ export default function ChatInfoPage() {
         showsVerticalScrollIndicator={false}
       >
         {/* =========================
-            PROFILE
+            USER
         ========================= */}
 
         <View style={styles.profileSection}>
           <Image
             source={{
-              uri: profileImage,
+              uri: user.profile_image || "https://i.pravatar.cc/300?img=12",
             }}
             style={styles.profileImage}
           />
 
-          <Text style={styles.name}>{displayName}</Text>
+          <Text style={styles.name}>{user.display_name}</Text>
 
-          {username !== "" && <Text style={styles.username}>@{username}</Text>}
+          {user.username && (
+            <Text style={styles.username}>@{user.username}</Text>
+          )}
 
-          {phone !== "" && <Text style={styles.phone}>{phone}</Text>}
+          {user.phone_number && (
+            <Text style={styles.phone}>{user.phone_number}</Text>
+          )}
         </View>
 
         {/* =========================
-            ACTIONS
+            CHAT INFORMATION
         ========================= */}
 
-        <View style={styles.actionsCard}>
-          <Pressable
-            style={styles.action}
-            onPress={() =>
-              Alert.alert(
-                "Notifications",
-                "Chat notification settings will be added later.",
-              )
-            }
-          >
-            <View style={styles.actionIcon}>
-              <Ionicons
-                name="notifications-outline"
-                size={24}
-                color={Colors.primary}
-              />
+        <Text style={styles.sectionTitle}>Chat Information</Text>
+
+        <View style={styles.card}>
+          <View style={styles.infoRow}>
+            <Ionicons
+              name="chatbubble-outline"
+              size={24}
+              color={Colors.primary}
+            />
+
+            <View style={styles.infoContent}>
+              <Text style={styles.infoTitle}>Chat ID</Text>
+
+              <Text style={styles.infoValue}>{chat.chat_id}</Text>
             </View>
-
-            <Text style={styles.actionText}>Notifications</Text>
-
-            <Ionicons name="chevron-forward" size={20} color={Colors.gray} />
-          </Pressable>
+          </View>
 
           <View style={styles.separator} />
 
-          <Pressable
-            style={styles.action}
-            onPress={() =>
-              Alert.alert(
-                "Starred Messages",
-                "Starred messages will be added later.",
-              )
-            }
-          >
-            <View style={styles.actionIcon}>
-              <Ionicons name="star-outline" size={24} color={Colors.primary} />
+          <View style={styles.infoRow}>
+            <Ionicons name="people-outline" size={24} color={Colors.primary} />
+
+            <View style={styles.infoContent}>
+              <Text style={styles.infoTitle}>Chat Type</Text>
+
+              <Text style={styles.infoValue}>{chat.chat_type}</Text>
             </View>
-
-            <Text style={styles.actionText}>Starred Messages</Text>
-
-            <Ionicons name="chevron-forward" size={20} color={Colors.gray} />
-          </Pressable>
+          </View>
         </View>
 
         {/* =========================
@@ -166,78 +123,52 @@ export default function ChatInfoPage() {
         <Text style={styles.sectionTitle}>Media, Links and Docs</Text>
 
         <Pressable
-          style={styles.mediaCard}
+          style={styles.card}
           onPress={() =>
             Alert.alert(
               "Media",
-              "Media, links and documents will be displayed here.",
+              "Media, links and documents will be added later.",
             )
           }
         >
-          <View style={styles.mediaIcon}>
-            <Ionicons name="images-outline" size={25} color={Colors.primary} />
+          <View style={styles.infoRow}>
+            <Ionicons name="images-outline" size={24} color={Colors.primary} />
+
+            <View style={styles.infoContent}>
+              <Text style={styles.infoTitle}>Media, Links and Docs</Text>
+
+              <Text style={styles.infoValue}>
+                {message_summary.attachment_count} items
+              </Text>
+            </View>
+
+            <Ionicons name="chevron-forward" size={20} color={Colors.gray} />
           </View>
-
-          <View style={styles.mediaTextContainer}>
-            <Text style={styles.mediaTitle}>Media, Links and Docs</Text>
-
-            <Text style={styles.mediaSubtitle}>{attachmentCount} items</Text>
-          </View>
-
-          <Ionicons name="chevron-forward" size={20} color={Colors.gray} />
         </Pressable>
 
         {/* =========================
-            PRIVACY / SECURITY
-        ========================= */}
-
-        <Text style={styles.sectionTitle}>Privacy and Security</Text>
-
-        <View style={styles.actionsCard}>
-          <View style={styles.action}>
-            <View style={styles.actionIcon}>
-              <Ionicons
-                name="lock-closed-outline"
-                size={24}
-                color={Colors.primary}
-              />
-            </View>
-
-            <View style={styles.actionTextContainer}>
-              <Text style={styles.actionText}>Encryption</Text>
-
-              <Text style={styles.description}>
-                Messages are protected with end-to-end encryption.
-              </Text>
-            </View>
-          </View>
-        </View>
-
-        {/* =========================
-            CHAT SETTINGS
+            CHAT OPTIONS
         ========================= */}
 
         <Text style={styles.sectionTitle}>Chat Settings</Text>
 
-        <View style={styles.actionsCard}>
+        <View style={styles.card}>
           <Pressable
-            style={styles.action}
+            style={styles.actionRow}
             onPress={() =>
               Alert.alert(
-                "Wallpaper",
-                "Chat wallpaper settings will be added later.",
+                "Notifications",
+                "Notification settings will be connected later.",
               )
             }
           >
-            <View style={styles.actionIcon}>
-              <Ionicons
-                name="color-palette-outline"
-                size={24}
-                color={Colors.primary}
-              />
-            </View>
+            <Ionicons
+              name="notifications-outline"
+              size={24}
+              color={Colors.primary}
+            />
 
-            <Text style={styles.actionText}>Wallpaper</Text>
+            <Text style={styles.actionText}>Notifications</Text>
 
             <Ionicons name="chevron-forward" size={20} color={Colors.gray} />
           </Pressable>
@@ -245,35 +176,77 @@ export default function ChatInfoPage() {
           <View style={styles.separator} />
 
           <Pressable
-            style={styles.action}
+            style={styles.actionRow}
             onPress={() =>
               Alert.alert(
-                "Clear Chat",
-                "Clear chat functionality will be connected to the backend later.",
+                "Starred Messages",
+                "Starred messages will be added later.",
               )
             }
           >
-            <View style={styles.actionIcon}>
-              <Ionicons name="trash-outline" size={24} color="#D9534F" />
-            </View>
+            <Ionicons name="star-outline" size={24} color={Colors.primary} />
 
-            <Text style={[styles.actionText, styles.dangerText]}>
-              Clear Chat
-            </Text>
+            <Text style={styles.actionText}>Starred Messages</Text>
+
+            <Ionicons name="chevron-forward" size={20} color={Colors.gray} />
+          </Pressable>
+
+          <View style={styles.separator} />
+
+          <Pressable
+            style={styles.actionRow}
+            onPress={() =>
+              Alert.alert(
+                "Wallpaper",
+                "Wallpaper settings will be added later.",
+              )
+            }
+          >
+            <Ionicons
+              name="color-palette-outline"
+              size={24}
+              color={Colors.primary}
+            />
+
+            <Text style={styles.actionText}>Wallpaper</Text>
+
+            <Ionicons name="chevron-forward" size={20} color={Colors.gray} />
           </Pressable>
         </View>
 
         {/* =========================
-            BLOCK / REPORT
+            PRIVACY
         ========================= */}
 
-        <View style={styles.actionsCard}>
+        <Text style={styles.sectionTitle}>Privacy and Security</Text>
+
+        <View style={styles.card}>
+          <View style={styles.infoRow}>
+            <Ionicons
+              name="lock-closed-outline"
+              size={24}
+              color={Colors.primary}
+            />
+
+            <View style={styles.infoContent}>
+              <Text style={styles.infoTitle}>Encryption</Text>
+
+              <Text style={styles.infoValue}>Messages are protected.</Text>
+            </View>
+          </View>
+        </View>
+
+        {/* =========================
+            DANGER
+        ========================= */}
+
+        <View style={styles.card}>
           <Pressable
-            style={styles.action}
+            style={styles.actionRow}
             onPress={() =>
               Alert.alert(
-                `Block ${displayName}?`,
-                "This will later create a record in BLOCKED_USER.",
+                `Block ${user.display_name}?`,
+                "This will later create a BLOCKED_USER record.",
                 [
                   {
                     text: "Cancel",
@@ -282,37 +255,31 @@ export default function ChatInfoPage() {
                   {
                     text: "Block",
                     style: "destructive",
-                    onPress: () => {
-                      console.log("Block user:", otherUser.user_id);
-                    },
+                    onPress: () => console.log("Block:", user.user_id),
                   },
                 ],
               )
             }
           >
-            <View style={styles.actionIcon}>
-              <Ionicons name="ban-outline" size={24} color="#D9534F" />
-            </View>
+            <Ionicons name="ban-outline" size={24} color="#D9534F" />
 
             <Text style={[styles.actionText, styles.dangerText]}>
-              Block {displayName}
+              Block {user.display_name}
             </Text>
           </Pressable>
 
           <View style={styles.separator} />
 
           <Pressable
-            style={styles.action}
+            style={styles.actionRow}
             onPress={() =>
               Alert.alert(
                 "Report User",
-                "Report functionality will be connected to the backend later.",
+                "Reporting will be connected to the backend later.",
               )
             }
           >
-            <View style={styles.actionIcon}>
-              <Ionicons name="flag-outline" size={24} color="#D9534F" />
-            </View>
+            <Ionicons name="flag-outline" size={24} color="#D9534F" />
 
             <Text style={[styles.actionText, styles.dangerText]}>
               Report User
@@ -320,7 +287,9 @@ export default function ChatInfoPage() {
           </Pressable>
         </View>
 
-        <Text style={styles.chatId}>Chat ID: {currentChat.chat_id}</Text>
+        <Text style={styles.footer}>
+          {message_summary.message_count} messages
+        </Text>
       </ScrollView>
     </>
   );
@@ -335,10 +304,6 @@ const styles = StyleSheet.create({
   contentContainer: {
     paddingBottom: 40,
   },
-
-  /* =========================
-     PROFILE
-  ========================= */
 
   profileSection: {
     alignItems: "center",
@@ -372,42 +337,46 @@ const styles = StyleSheet.create({
     marginTop: 5,
   },
 
-  /* =========================
-     SECTION
-  ========================= */
-
   sectionTitle: {
     fontSize: 14,
     color: Colors.gray,
     paddingHorizontal: 18,
     paddingTop: 25,
     paddingBottom: 8,
-    fontWeight: "500",
   },
 
-  /* =========================
-     CARDS
-  ========================= */
-
-  actionsCard: {
+  card: {
     backgroundColor: Colors.background,
     paddingHorizontal: 16,
   },
 
-  action: {
-    minHeight: 58,
+  infoRow: {
+    minHeight: 65,
     flexDirection: "row",
     alignItems: "center",
   },
 
-  actionIcon: {
-    width: 42,
-    alignItems: "flex-start",
-    justifyContent: "center",
+  infoContent: {
+    flex: 1,
+    marginLeft: 15,
   },
 
-  actionTextContainer: {
-    flex: 1,
+  infoTitle: {
+    fontSize: 16,
+    color: "#000",
+  },
+
+  infoValue: {
+    fontSize: 13,
+    color: Colors.gray,
+    marginTop: 3,
+  },
+
+  actionRow: {
+    minHeight: 58,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 15,
   },
 
   actionText: {
@@ -416,69 +385,22 @@ const styles = StyleSheet.create({
     color: "#000",
   },
 
-  description: {
-    fontSize: 13,
-    color: Colors.gray,
-    marginTop: 3,
-    marginRight: 10,
+  dangerText: {
+    color: "#D9534F",
   },
 
   separator: {
     height: StyleSheet.hairlineWidth,
     backgroundColor: Colors.lightGray,
-    marginLeft: 42,
+    marginLeft: 40,
   },
 
-  dangerText: {
-    color: "#D9534F",
-  },
-
-  /* =========================
-     MEDIA
-  ========================= */
-
-  mediaCard: {
-    minHeight: 70,
-    flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: Colors.background,
-    paddingHorizontal: 16,
-  },
-
-  mediaIcon: {
-    width: 45,
-    alignItems: "flex-start",
-  },
-
-  mediaTextContainer: {
-    flex: 1,
-  },
-
-  mediaTitle: {
-    fontSize: 16,
-    color: "#000",
-  },
-
-  mediaSubtitle: {
-    fontSize: 13,
-    color: Colors.gray,
-    marginTop: 3,
-  },
-
-  /* =========================
-     FOOTER
-  ========================= */
-
-  chatId: {
+  footer: {
     textAlign: "center",
     color: Colors.gray,
     fontSize: 12,
-    marginTop: 30,
+    marginTop: 25,
   },
-
-  /* =========================
-     ERROR
-  ========================= */
 
   errorContainer: {
     flex: 1,
@@ -488,7 +410,7 @@ const styles = StyleSheet.create({
   },
 
   errorText: {
-    color: Colors.gray,
     fontSize: 16,
+    color: Colors.gray,
   },
 });

@@ -1,0 +1,68 @@
+[
+  {
+    "chat": {
+      "chat_id": 1001,
+      "chat_type": "PRIVATE",
+      "created_at": "2026-08-20T10:30:00Z"
+    },
+    "user": {
+      "user_id": 102,
+      "display_name": "Arif Rahman",
+      "username": "arif",
+      "phone_number": "+8801700000000",
+      "profile_image": "https://i.pravatar.cc/300?img=12"
+    },
+    "chat_member": {
+      "chat_id": 1001,
+      "user_id": 102
+    },
+    "message_summary": {
+      "message_count": 24,
+      "attachment_count": 5
+    }
+  },
+  {
+    "chat": {
+      "chat_id": 1002,
+      "chat_type": "PRIVATE",
+      "created_at": "2026-08-21T08:15:00Z"
+    },
+    "user": {
+      "user_id": 103,
+      "display_name": "Sadia Islam",
+      "username": "sadia",
+      "phone_number": "+8801800000000",
+      "profile_image": "https://i.pravatar.cc/300?img=32"
+    },
+    "chat_member": {
+      "chat_id": 1002,
+      "user_id": 103
+    },
+    "message_summary": {
+      "message_count": 18,
+      "attachment_count": 2
+    }
+  },
+  {
+    "chat": {
+      "chat_id": 1003,
+      "chat_type": "PRIVATE",
+      "created_at": "2026-08-22T14:45:00Z"
+    },
+    "user": {
+      "user_id": 104,
+      "display_name": "Tanvir Ahmed",
+      "username": "tanvir",
+      "phone_number": "+8801900000000",
+      "profile_image": "https://i.pravatar.cc/300?img=15"
+    },
+    "chat_member": {
+      "chat_id": 1003,
+      "user_id": 104
+    },
+    "message_summary": {
+      "message_count": 31,
+      "attachment_count": 8
+    }
+  }
+]
