@@ -1,11 +1,10 @@
 import { Ionicons } from "@expo/vector-icons";
 import { Link, Stack, useLocalSearchParams } from "expo-router";
 
-import { Image, Text, TouchableOpacity, View } from "react-native";
-
-import Colors from "../../../constants/Colors";
+import { Image, Pressable, Text, TouchableOpacity, View } from "react-native";
 
 import chats from "../../../assets/data/chats.json";
+import Colors from "../../../constants/Colors";
 
 export default function ChatsLayout() {
   return (
@@ -18,11 +17,8 @@ export default function ChatsLayout() {
         name="index"
         options={{
           title: "Chats",
-
           headerLargeTitle: true,
-
           headerTransparent: true,
-
           headerBlurEffect: "regular",
 
           headerLeft: () => (
@@ -80,7 +76,6 @@ export default function ChatsLayout() {
         name="[id]"
         options={{
           title: "",
-
           headerBackTitleVisible: false,
 
           headerTitle: () => <ChatHeader />,
@@ -101,7 +96,6 @@ export default function ChatsLayout() {
         name="info/[id]"
         options={{
           title: "Info",
-
           headerBackTitleVisible: false,
 
           headerStyle: {
@@ -175,18 +169,22 @@ function ChatInfoButton() {
       href={{
         pathname: "/(tabs)/chats/info/[id]",
         params: {
-          id: id,
+          id: String(id),
         },
       }}
       asChild
     >
-      <TouchableOpacity>
+      <Pressable
+        style={{
+          padding: 5,
+        }}
+      >
         <Ionicons
           name="information-circle-outline"
-          color={Colors.primary}
           size={30}
+          color={Colors.primary}
         />
-      </TouchableOpacity>
+      </Pressable>
     </Link>
   );
 }
