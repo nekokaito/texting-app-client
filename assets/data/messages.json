@@ -1,0 +1,114 @@
+[
+  {
+    "message_id": 5001,
+    "chat_id": 1001,
+    "sender_id": 102,
+    "content": "Hey, are you coming tomorrow?",
+    "message_type": "TEXT",
+    "created_at": "2026-08-20T20:40:00"
+  },
+  {
+    "message_id": 5002,
+    "chat_id": 1001,
+    "sender_id": 101,
+    "content": "Yes, I will be there.",
+    "message_type": "TEXT",
+    "created_at": "2026-08-20T20:42:00"
+  },
+  {
+    "message_id": 5003,
+    "chat_id": 1001,
+    "sender_id": 102,
+    "content": "Great! See you tomorrow.",
+    "message_type": "TEXT",
+    "created_at": "2026-08-20T20:45:00"
+  },
+  {
+    "message_id": 5004,
+    "chat_id": 1002,
+    "sender_id": 103,
+    "content": "Let's meet at 5 PM.",
+    "message_type": "TEXT",
+    "created_at": "2026-08-20T17:18:00"
+  },
+  {
+    "message_id": 5005,
+    "chat_id": 1002,
+    "sender_id": 101,
+    "content": "Sure, that works for me.",
+    "message_type": "TEXT",
+    "created_at": "2026-08-20T17:20:00"
+  },
+  {
+    "message_id": 5006,
+    "chat_id": 1003,
+    "sender_id": 104,
+    "content": "Did you finish the assignment?",
+    "message_type": "TEXT",
+    "created_at": "2026-08-19T22:10:00"
+  },
+  {
+    "message_id": 5007,
+    "chat_id": 1003,
+    "sender_id": 101,
+    "content": "Almost. I will finish it tonight.",
+    "message_type": "TEXT",
+    "created_at": "2026-08-19T22:14:00"
+  },
+  {
+    "message_id": 5008,
+    "chat_id": 1003,
+    "sender_id": 104,
+    "content": "Okay, let me know when you're done.",
+    "message_type": "TEXT",
+    "created_at": "2026-08-19T22:16:00"
+  },
+  {
+    "message_id": 5009,
+    "chat_id": 1004,
+    "sender_id": 101,
+    "content": "That sounds good. See you later!",
+    "message_type": "TEXT",
+    "created_at": "2026-08-19T18:40:00"
+  },
+  {
+    "message_id": 5010,
+    "chat_id": 1004,
+    "sender_id": 105,
+    "content": "See you!",
+    "message_type": "TEXT",
+    "created_at": "2026-08-19T18:42:00"
+  },
+  {
+    "message_id": 5011,
+    "chat_id": 1005,
+    "sender_id": 106,
+    "content": "Can you check the database schema?",
+    "message_type": "TEXT",
+    "created_at": "2026-08-18T21:25:00"
+  },
+  {
+    "message_id": 5012,
+    "chat_id": 1005,
+    "sender_id": 101,
+    "content": "Yes, I will check it tonight.",
+    "message_type": "TEXT",
+    "created_at": "2026-08-18T21:28:00"
+  },
+  {
+    "message_id": 5013,
+    "chat_id": 1006,
+    "sender_id": 107,
+    "content": "I'll call you when I get home.",
+    "message_type": "TEXT",
+    "created_at": "2026-08-18T16:05:00"
+  },
+  {
+    "message_id": 5014,
+    "chat_id": 1006,
+    "sender_id": 101,
+    "content": "Okay, no problem.",
+    "message_type": "TEXT",
+    "created_at": "2026-08-18T16:07:00"
+  }
+]
