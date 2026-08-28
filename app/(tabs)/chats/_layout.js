@@ -46,7 +46,7 @@ export default function ChatsLayout() {
                 />
               </TouchableOpacity>
 
-              <Link href="/(modals)/new-chat" asChild>
+              <Link href="/contacts" asChild>
                 <TouchableOpacity>
                   <Ionicons
                     name="add-circle"
