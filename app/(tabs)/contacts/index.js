@@ -14,7 +14,7 @@ import {
   View,
 } from "react-native";
 
-import Colors from "../../constants/Colors";
+import Colors from "../../../constants/Colors";
 
 export default function ContactsPage() {
   const [contacts, setContacts] = useState([]);
@@ -234,7 +234,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     marginHorizontal: 15,
-    marginTop: 50,
+    marginTop: 10,
     paddingHorizontal: 12,
     height: 44,
     backgroundColor: "#E9E9EC",
