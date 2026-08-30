@@ -1,5 +1,7 @@
 import { Stack, useLocalSearchParams, useRouter } from "expo-router";
+
 import { useEffect, useState } from "react";
+
 import { Alert, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
 import {
@@ -9,12 +11,16 @@ import {
   useClearByFocusCell,
 } from "react-native-confirmation-code-field";
 
+import { API_URL } from "../../constants/API";
+
 const CELL_COUNT = 6;
 
 export default function OTP() {
   const { phone } = useLocalSearchParams();
+  const router = useRouter();
 
   const [code, setCode] = useState("");
+  const [loading, setLoading] = useState(false);
 
   const ref = useBlurOnFulfill({
     value: code,
@@ -26,51 +32,101 @@ export default function OTP() {
     setValue: setCode,
   });
 
+  /*
+   * Verify OTP when 6 digits are entered
+   */
   useEffect(() => {
     if (code.length === CELL_COUNT) {
       verifyCode();
     }
   }, [code]);
 
+  /*
+   * Verify OTP
+   *
+   * Backend verification endpoint will be
+   * connected here.
+   */
   const verifyCode = async () => {
+    if (loading) {
+      return;
+    }
+
     try {
+      setLoading(true);
+
       console.log("Phone:", phone);
       console.log("OTP:", code);
 
-      // TODO:
-      // Connect this to your Node.js backend later.
-      //
-      // Example:
-      // await verifyOTP(phone, code);
+      /*
+       * TODO:
+       *
+       * Connect this to:
+       *
+       * POST /api/auth/verify-otp
+       */
 
-      Alert.alert("Success", "OTP verified successfully!");
+      /*
+       * Temporary navigation for testing.
+       *
+       * After backend verification succeeds,
+       * continue to profile setup.
+       */
+      router.replace("/(auth)/profile");
     } catch (error) {
       console.log("Verification error:", error);
+
+      setCode("");
 
       Alert.alert(
         "Verification Failed",
         "The verification code is incorrect or expired.",
       );
+    } finally {
+      setLoading(false);
     }
   };
 
+  /*
+   * Resend OTP
+   */
   const resendCode = async () => {
-    try {
-      console.log("Resending OTP to:", phone);
+    if (loading) {
+      return;
+    }
 
-      // TODO:
-      // Connect to your Node.js backend.
-      // await resendOTP(phone);
+    try {
+      setLoading(true);
+
+      const response = await fetch(`${API_URL}/api/auth/send-otp`, {
+        method: "POST",
+
+        headers: {
+          "Content-Type": "application/json",
+        },
+
+        body: JSON.stringify({
+          phone: phone,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || "Unable to resend OTP");
+      }
+
+      setCode("");
 
       Alert.alert("Code Sent", "A new verification code has been sent.");
     } catch (error) {
-      console.log("Resend error:", error);
+      console.log("Resend OTP error:", error);
 
       Alert.alert("Error", "Unable to resend the verification code.");
+    } finally {
+      setLoading(false);
     }
   };
-
-  const router = useRouter();
 
   return (
     <View style={styles.container}>
@@ -100,6 +156,7 @@ export default function OTP() {
         rootStyle={styles.codeFieldRoot}
         keyboardType="number-pad"
         textContentType="oneTimeCode"
+        editable={!loading}
         renderCell={({ index, symbol, isFocused }) => (
           <View
             key={index}
@@ -113,17 +170,16 @@ export default function OTP() {
         )}
       />
 
-      <TouchableOpacity style={styles.resendButton} onPress={resendCode}>
-        <Text style={styles.resendText}>
-          Didn&apos;t receive a verification code? Resend
-        </Text>
-      </TouchableOpacity>
-
       <TouchableOpacity
-        style={styles.chatButton}
-        onPress={() => router.push("/(tabs)/chats")}
+        style={styles.resendButton}
+        onPress={resendCode}
+        disabled={loading}
       >
-        <Text style={styles.chatButtonText}>Go to Chats</Text>
+        <Text style={[styles.resendText, loading && styles.disabledText]}>
+          {loading
+            ? "Please wait..."
+            : "Didn't receive a verification code? Resend"}
+        </Text>
       </TouchableOpacity>
     </View>
   );
@@ -193,18 +249,7 @@ const styles = StyleSheet.create({
     textAlign: "center",
   },
 
-  chatButton: {
-    width: "100%",
-    backgroundColor: "#ca982d",
-    paddingVertical: 14,
-    borderRadius: 10,
-    alignItems: "center",
-    marginTop: 10,
-  },
-
-  chatButtonText: {
-    color: "#FFFFFF",
-    fontSize: 17,
-    fontWeight: "600",
+  disabledText: {
+    opacity: 0.5,
   },
 });
