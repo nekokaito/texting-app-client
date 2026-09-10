@@ -1,23 +1,23 @@
 import { Stack, useLocalSearchParams, useRouter } from "expo-router";
-
 import { useEffect, useState } from "react";
-
 import { Alert, StyleSheet, Text, TouchableOpacity, View } from "react-native";
-
 import {
   CodeField,
   Cursor,
   useBlurOnFulfill,
   useClearByFocusCell,
 } from "react-native-confirmation-code-field";
-
 import { API_URL } from "../../constants/API";
 
 const CELL_COUNT = 6;
 
+console.log("API_URL:", API_URL);
+
 export default function OTP() {
   const { phone } = useLocalSearchParams();
   const router = useRouter();
+  const cleanPhoneNumber = phone ? phone.replace(/\s/g, "") : "";
+  console.log("Phone number from params:", cleanPhoneNumber);
 
   const [code, setCode] = useState("");
   const [loading, setLoading] = useState(false);
@@ -32,46 +32,63 @@ export default function OTP() {
     setValue: setCode,
   });
 
-  /*
-   * Verify OTP when 6 digits are entered
-   */
+  // Verify OTP when 6 digits are entered
   useEffect(() => {
-    if (code.length === CELL_COUNT) {
-      verifyCode();
-    }
-  }, [code]);
+    const testBackend = async () => {
+      try {
+        console.log("Testing backend:", `${API_URL}/api/health`);
 
-  /*
-   * Verify OTP
-   *
-   * Backend verification endpoint will be
-   * connected here.
-   */
+        const response = await fetch(`${API_URL}/api/health`);
+
+        const data = await response.json();
+
+        console.log("Backend response:", data);
+
+        if (!response.ok) {
+          throw new Error(data.message || "Health check failed");
+        }
+
+        Alert.alert("Backend Connected", JSON.stringify(data, null, 2));
+      } catch (error) {
+        console.log("Backend error:", error);
+
+        Alert.alert(
+          "Backend Connection Failed",
+          error.message || "Unable to connect to backend",
+        );
+      }
+    };
+
+    testBackend();
+  }, []);
+
+  // Verify OTP
   const verifyCode = async () => {
-    if (loading) {
+    if (loading || !cleanPhoneNumber || code.length !== CELL_COUNT) {
       return;
     }
 
     try {
       setLoading(true);
 
-      console.log("Phone:", phone);
-      console.log("OTP:", code);
+      const response = await fetch(`${API_URL}/api/auth/verify-otp`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          phoneNumber: cleanPhoneNumber,
+          otp: code,
+        }),
+      });
 
-      /*
-       * TODO:
-       *
-       * Connect this to:
-       *
-       * POST /api/auth/verify-otp
-       */
+      const data = await response.json();
 
-      /*
-       * Temporary navigation for testing.
-       *
-       * After backend verification succeeds,
-       * continue to profile setup.
-       */
+      if (!response.ok) {
+        throw new Error(data.message || "Invalid or expired OTP");
+      }
+
+      // OTP verified successfully
       router.replace("/(auth)/profile");
     } catch (error) {
       console.log("Verification error:", error);
@@ -80,18 +97,16 @@ export default function OTP() {
 
       Alert.alert(
         "Verification Failed",
-        "The verification code is incorrect or expired.",
+        error.message || "The verification code is incorrect or expired.",
       );
     } finally {
       setLoading(false);
     }
   };
 
-  /*
-   * Resend OTP
-   */
+  // Resend OTP
   const resendCode = async () => {
-    if (loading) {
+    if (loading || !cleanPhoneNumber) {
       return;
     }
 
@@ -100,13 +115,11 @@ export default function OTP() {
 
       const response = await fetch(`${API_URL}/api/auth/send-otp`, {
         method: "POST",
-
         headers: {
           "Content-Type": "application/json",
         },
-
         body: JSON.stringify({
-          phone: phone,
+          phoneNumber: cleanPhoneNumber,
         }),
       });
 
@@ -122,7 +135,10 @@ export default function OTP() {
     } catch (error) {
       console.log("Resend OTP error:", error);
 
-      Alert.alert("Error", "Unable to resend the verification code.");
+      Alert.alert(
+        "Error",
+        error.message || "Unable to resend the verification code.",
+      );
     } finally {
       setLoading(false);
     }

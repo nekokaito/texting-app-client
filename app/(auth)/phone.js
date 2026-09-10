@@ -2,6 +2,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import { useState } from "react";
 import {
+  Alert,
   KeyboardAvoidingView,
   Platform,
   StyleSheet,
@@ -10,6 +11,7 @@ import {
   View,
 } from "react-native";
 import MaskInput from "react-native-mask-input";
+import { API_URL } from "../../constants/API";
 import Colors from "../../constants/Colors";
 
 const BD_PHONE = [
@@ -36,12 +38,39 @@ const PhoneNumberScreen = () => {
 
   const isValid = phoneNumber.length >= 15;
 
-  const handleNext = () => {
+  const handleNext = async () => {
     if (!isValid) return;
 
-    // Design only for now.
-    // Later we will connect OTP/API here.
-    router.push("/otp");
+    try {
+      const cleanPhoneNumber = phoneNumber.replace(/\s/g, "");
+
+      const response = await fetch(`${API_URL}/api/auth/send-otp`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          phoneNumber: cleanPhoneNumber,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || "Unable to send OTP");
+      }
+
+      router.push({
+        pathname: "/otp",
+        params: {
+          phone: cleanPhoneNumber,
+        },
+      });
+    } catch (error) {
+      console.log("Send OTP error:", error);
+
+      Alert.alert("Unable to send OTP", error.message || "Please try again.");
+    }
   };
 
   return (
