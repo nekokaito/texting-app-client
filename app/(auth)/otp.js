@@ -1,12 +1,18 @@
 import { Stack, useLocalSearchParams, useRouter } from "expo-router";
+
 import { useEffect, useState } from "react";
+
 import { Alert, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+
 import {
   CodeField,
   Cursor,
   useBlurOnFulfill,
   useClearByFocusCell,
 } from "react-native-confirmation-code-field";
+
+import { useTheme } from "react-native-paper";
+
 import { API_URL } from "../../constants/API";
 
 const CELL_COUNT = 6;
@@ -15,8 +21,13 @@ console.log("API_URL:", API_URL);
 
 export default function OTP() {
   const { phone } = useLocalSearchParams();
+
   const router = useRouter();
+
+  const { colors } = useTheme();
+
   const cleanPhoneNumber = phone ? phone.replace(/\s/g, "") : "";
+
   console.log("Phone number from params:", cleanPhoneNumber);
 
   const [code, setCode] = useState("");
@@ -34,33 +45,10 @@ export default function OTP() {
 
   // Verify OTP when 6 digits are entered
   useEffect(() => {
-    const testBackend = async () => {
-      try {
-        console.log("Testing backend:", `${API_URL}/api/health`);
-
-        const response = await fetch(`${API_URL}/api/health`);
-
-        const data = await response.json();
-
-        console.log("Backend response:", data);
-
-        if (!response.ok) {
-          throw new Error(data.message || "Health check failed");
-        }
-
-        Alert.alert("Backend Connected", JSON.stringify(data, null, 2));
-      } catch (error) {
-        console.log("Backend error:", error);
-
-        Alert.alert(
-          "Backend Connection Failed",
-          error.message || "Unable to connect to backend",
-        );
-      }
-    };
-
-    testBackend();
-  }, []);
+    if (code.length === CELL_COUNT) {
+      verifyCode();
+    }
+  }, [code]);
 
   // Verify OTP
   const verifyCode = async () => {
@@ -85,11 +73,12 @@ export default function OTP() {
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.message || "Invalid or expired OTP");
+        throw new Error(data.error || "Invalid or expired OTP");
       }
 
-      // OTP verified successfully
-      router.replace("/(auth)/profile");
+      console.log("OTP verified successfully");
+
+      router.replace("/chats");
     } catch (error) {
       console.log("Verification error:", error);
 
@@ -126,12 +115,12 @@ export default function OTP() {
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.message || "Unable to resend OTP");
+        throw new Error(data.error || "Unable to resend OTP");
       }
 
       setCode("");
 
-      Alert.alert("Code Sent", "A new verification code has been sent.");
+      Alert.alert("Code Sent", "A new verification code has been generated.");
     } catch (error) {
       console.log("Resend OTP error:", error);
 
@@ -145,20 +134,54 @@ export default function OTP() {
   };
 
   return (
-    <View style={styles.container}>
+    <View
+      style={[
+        styles.container,
+        {
+          backgroundColor: colors.background,
+        },
+      ]}
+    >
       <Stack.Screen
         options={{
           title: phone || "Verify Phone",
+          headerStyle: {
+            backgroundColor: colors.background,
+          },
+          headerTintColor: colors.onSurface,
         }}
       />
 
-      <Text style={styles.title}>Verify your phone number.</Text>
+      <Text
+        style={[
+          styles.title,
+          {
+            color: colors.onSurface,
+          },
+        ]}
+      >
+        Verify your phone number
+      </Text>
 
-      <Text style={styles.legal}>
+      <Text
+        style={[
+          styles.legal,
+          {
+            color: colors.onSurfaceVariant,
+          },
+        ]}
+      >
         We have sent you an SMS with a code to the number above.
       </Text>
 
-      <Text style={styles.legal}>
+      <Text
+        style={[
+          styles.legal,
+          {
+            color: colors.onSurfaceVariant,
+          },
+        ]}
+      >
         To complete your phone number verification, please enter the 6-digit
         activation code.
       </Text>
@@ -177,9 +200,25 @@ export default function OTP() {
           <View
             key={index}
             onLayout={getCellOnLayoutHandler(index)}
-            style={[styles.cellRoot, isFocused && styles.focusCell]}
+            style={[
+              styles.cellRoot,
+              {
+                borderBottomColor: colors.outlineVariant,
+              },
+              isFocused && {
+                borderBottomColor: colors.primary,
+                borderBottomWidth: 2,
+              },
+            ]}
           >
-            <Text style={styles.cellText}>
+            <Text
+              style={[
+                styles.cellText,
+                {
+                  color: colors.onSurface,
+                },
+              ]}
+            >
               {symbol || (isFocused ? <Cursor /> : null)}
             </Text>
           </View>
@@ -191,7 +230,15 @@ export default function OTP() {
         onPress={resendCode}
         disabled={loading}
       >
-        <Text style={[styles.resendText, loading && styles.disabledText]}>
+        <Text
+          style={[
+            styles.resendText,
+            {
+              color: colors.primary,
+            },
+            loading && styles.disabledText,
+          ]}
+        >
           {loading
             ? "Please wait..."
             : "Didn't receive a verification code? Resend"}
@@ -206,7 +253,6 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: "center",
     padding: 20,
-    backgroundColor: "#FFFFFF",
     gap: 20,
   },
 
@@ -214,13 +260,11 @@ const styles = StyleSheet.create({
     fontSize: 24,
     fontWeight: "600",
     marginTop: 50,
-    color: "#000000",
   },
 
   legal: {
     fontSize: 14,
     textAlign: "center",
-    color: "#000000",
     lineHeight: 21,
   },
 
@@ -237,20 +281,12 @@ const styles = StyleSheet.create({
     height: 50,
     justifyContent: "center",
     alignItems: "center",
-    borderBottomColor: "#CCCCCC",
     borderBottomWidth: 1,
   },
 
   cellText: {
-    color: "#000000",
     fontSize: 32,
     textAlign: "center",
-  },
-
-  focusCell: {
-    paddingBottom: 4,
-    borderBottomColor: "#ca982d",
-    borderBottomWidth: 2,
   },
 
   resendButton: {
@@ -260,7 +296,6 @@ const styles = StyleSheet.create({
   },
 
   resendText: {
-    color: "#dfbf30",
     fontSize: 17,
     textAlign: "center",
   },

@@ -1,4 +1,4 @@
-import { Link, useRouter } from "expo-router";
+import { useRouter } from "expo-router";
 
 import {
   Image,
@@ -7,11 +7,25 @@ import {
   Text,
   TouchableOpacity,
   View,
+  useColorScheme,
 } from "react-native";
 
 const welcomeImage = require("../assets/images/icon.png");
 
-const WelcomeScreen = () => {
+export default function WelcomeScreen() {
+  const router = useRouter();
+  const colorScheme = useColorScheme();
+  const isDark = colorScheme === "dark";
+
+  const colors = {
+    background: isDark ? "#121212" : "#FFFFFF",
+    text: isDark ? "#FFFFFF" : "#000000",
+    description: isDark ? "#B0B0B0" : "#667781",
+    buttonBackground: isDark ? "#3D3518" : "#F9E7A0",
+    buttonText: isDark ? "#F5D76E" : "#A88F00",
+    link: isDark ? "#F5D76E" : "#B08A00",
+  };
+
   const openPrivacyPolicy = () => {
     Linking.openURL("https://example.com/privacy");
   };
@@ -20,37 +34,73 @@ const WelcomeScreen = () => {
     Linking.openURL("https://example.com/terms");
   };
 
-  const router = useRouter();
-
   return (
-    <View style={styles.container}>
+    <View
+      style={[
+        styles.container,
+        { backgroundColor: colors.background },
+      ]}
+    >
       <Image source={welcomeImage} style={styles.welcome} />
 
-      <Text style={styles.headline}>Welcome to Texting App</Text>
+      <Text
+        style={[
+          styles.headline,
+          { color: colors.text },
+        ]}
+      >
+        Welcome to Texting App
+      </Text>
 
-      <Text style={styles.description}>
+      <Text
+        style={[
+          styles.description,
+          { color: colors.description },
+        ]}
+      >
         Read our{" "}
-        <Text style={styles.link} onPress={openPrivacyPolicy}>
+        <Text
+          style={[
+            styles.link,
+            { color: colors.link },
+          ]}
+          onPress={openPrivacyPolicy}
+        >
           Privacy Policy
         </Text>
-        . Tap &quot;Agree & Continue&quot; to accept our{" "}
-        <Text style={styles.link} onPress={openTerms}>
+        . Tap Agree & Continue to accept our{" "}
+        <Text
+          style={[
+            styles.link,
+            { color: colors.link },
+          ]}
+          onPress={openTerms}
+        >
           Terms of Service
         </Text>
         .
       </Text>
 
-      <Link href="/phone" replace asChild>
-        <TouchableOpacity
-          style={styles.button}
-          onPress={() => router.push("/phone")}
+      <TouchableOpacity
+        style={[
+          styles.button,
+          { backgroundColor: colors.buttonBackground },
+        ]}
+        onPress={() => router.replace("/phone")}
+        activeOpacity={0.8}
+      >
+        <Text
+          style={[
+            styles.buttonText,
+            { color: colors.buttonText },
+          ]}
         >
-          <Text style={styles.buttonText}>Agree & Continue</Text>
-        </TouchableOpacity>
-      </Link>
+          Agree & Continue
+        </Text>
+      </TouchableOpacity>
     </View>
   );
-};
+}
 
 const styles = StyleSheet.create({
   container: {
@@ -58,7 +108,6 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     padding: 20,
-    backgroundColor: "#FFFFFF",
   },
 
   welcome: {
@@ -80,28 +129,22 @@ const styles = StyleSheet.create({
     fontSize: 14,
     textAlign: "center",
     marginBottom: 80,
-    color: "#667781",
     lineHeight: 21,
   },
 
   link: {
-    color: "#e0b94c",
+    fontWeight: "500",
   },
 
   button: {
     width: "100%",
-    color: "#a88f00",
-    backgroundColor: "#f9e7a0",
     paddingVertical: 15,
     borderRadius: 15,
     alignItems: "center",
   },
 
   buttonText: {
-    color: "#a88f00",
     fontSize: 22,
     fontWeight: "500",
   },
 });
-
-export default WelcomeScreen;
