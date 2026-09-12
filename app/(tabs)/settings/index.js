@@ -1,17 +1,25 @@
 import { Ionicons } from "@expo/vector-icons";
+import { useRouter } from "expo-router";
+import * as SecureStore from "expo-secure-store";
+import { useState } from "react";
 import {
   FlatList,
   ScrollView,
-  Text,
+  StyleSheet,
   TouchableOpacity,
   View,
 } from "react-native";
-
+import { Button, Dialog, Portal, Text, useTheme } from "react-native-paper";
 import BoxedIcon from "../../../components/BoxedIcon";
 import Colors from "../../../constants/Colors";
 import { defaultStyles } from "../../../constants/Styles";
 
 export default function SettingsPage() {
+  const router = useRouter();
+  const { colors } = useTheme();
+
+  const [logoutVisible, setLogoutVisible] = useState(false);
+
   const devices = [
     {
       name: "Broadcast Lists",
@@ -71,6 +79,16 @@ export default function SettingsPage() {
     },
   ];
 
+  const handleLogout = async () => {
+    try {
+      await SecureStore.deleteItemAsync("user_session");
+      setLogoutVisible(false);
+      router.replace("/welcome");
+    } catch (error) {
+      console.error("Logout Error:", error);
+    }
+  };
+
   const renderItem = ({ item }) => (
     <TouchableOpacity activeOpacity={0.7} style={defaultStyles.item}>
       <BoxedIcon name={item.icon} backgroundColor={item.backgroundColor} />
@@ -79,98 +97,122 @@ export default function SettingsPage() {
         style={{
           fontSize: 18,
           flex: 1,
+          color: colors.onSurface,
         }}
       >
         {item.name}
       </Text>
 
-      <Ionicons name="chevron-forward" size={20} color={Colors.gray} />
+      <Ionicons
+        name="chevron-forward"
+        size={20}
+        color={colors.onSurfaceVariant}
+      />
     </TouchableOpacity>
   );
 
   return (
-    <View
-      style={{
-        flex: 1,
-        backgroundColor: Colors.background,
-      }}
-    >
-      <ScrollView
-        contentInsetAdjustmentBehavior="automatic"
-        contentContainerStyle={{
-          paddingBottom: 40,
-        }}
+    <>
+      <View
+        style={[
+          styles.container,
+          {
+            backgroundColor: colors.background,
+          },
+        ]}
       >
-        {/* =========================
-            DEVICES
-        ========================= */}
-
-        <View style={defaultStyles.block}>
-          <FlatList
-            data={devices}
-            scrollEnabled={false}
-            keyExtractor={(item) => item.name}
-            ItemSeparatorComponent={() => (
-              <View style={defaultStyles.separator} />
-            )}
-            renderItem={renderItem}
-          />
-        </View>
-
-        {/* =========================
-            SETTINGS
-        ========================= */}
-
-        <View style={defaultStyles.block}>
-          <FlatList
-            data={items}
-            scrollEnabled={false}
-            keyExtractor={(item) => item.name}
-            ItemSeparatorComponent={() => (
-              <View style={defaultStyles.separator} />
-            )}
-            renderItem={renderItem}
-          />
-        </View>
-
-        {/* =========================
-            SUPPORT
-        ========================= */}
-
-        <View style={defaultStyles.block}>
-          <FlatList
-            data={support}
-            scrollEnabled={false}
-            keyExtractor={(item) => item.name}
-            ItemSeparatorComponent={() => (
-              <View style={defaultStyles.separator} />
-            )}
-            renderItem={renderItem}
-          />
-        </View>
-
-        {/* =========================
-            LOG OUT
-        ========================= */}
-
-        <TouchableOpacity
-          activeOpacity={0.7}
-          onPress={() => {
-            console.log("Logout pressed");
-          }}
+        <ScrollView
+          contentInsetAdjustmentBehavior="automatic"
+          contentContainerStyle={styles.scrollContent}
         >
-          <Text
-            style={{
-              color: Colors.primary,
-              fontSize: 18,
-              textAlign: "center",
-              paddingVertical: 14,
-            }}
+          <View style={defaultStyles.block}>
+            <FlatList
+              data={devices}
+              scrollEnabled={false}
+              keyExtractor={(item) => item.name}
+              ItemSeparatorComponent={() => (
+                <View style={defaultStyles.separator} />
+              )}
+              renderItem={renderItem}
+            />
+          </View>
+
+          <View style={defaultStyles.block}>
+            <FlatList
+              data={items}
+              scrollEnabled={false}
+              keyExtractor={(item) => item.name}
+              ItemSeparatorComponent={() => (
+                <View style={defaultStyles.separator} />
+              )}
+              renderItem={renderItem}
+            />
+          </View>
+
+          <View style={defaultStyles.block}>
+            <FlatList
+              data={support}
+              scrollEnabled={false}
+              keyExtractor={(item) => item.name}
+              ItemSeparatorComponent={() => (
+                <View style={defaultStyles.separator} />
+              )}
+              renderItem={renderItem}
+            />
+          </View>
+
+          <TouchableOpacity
+            activeOpacity={0.7}
+            onPress={() => setLogoutVisible(true)}
           >
-            Log Out
-          </Text>
-        </TouchableOpacity>
-      </ScrollView>
-    </View>
+            <Text
+              style={[
+                styles.logoutText,
+                {
+                  color: colors.primary,
+                },
+              ]}
+            >
+              Log Out
+            </Text>
+          </TouchableOpacity>
+        </ScrollView>
+      </View>
+
+      <Portal>
+        <Dialog
+          visible={logoutVisible}
+          onDismiss={() => setLogoutVisible(false)}
+        >
+          <Dialog.Title>Log out?</Dialog.Title>
+
+          <Dialog.Content>
+            <Text variant="bodyMedium">
+              Are you sure you want to log out of your account?
+            </Text>
+          </Dialog.Content>
+
+          <Dialog.Actions>
+            <Button onPress={() => setLogoutVisible(false)}>Cancel</Button>
+
+            <Button onPress={handleLogout}>Log Out</Button>
+          </Dialog.Actions>
+        </Dialog>
+      </Portal>
+    </>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+  },
+  scrollContent: {
+    paddingBottom: 40,
+  },
+  logoutText: {
+    fontSize: 18,
+    textAlign: "center",
+    paddingVertical: 14,
+  },
+});

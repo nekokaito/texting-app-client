@@ -1,14 +1,30 @@
 import { Ionicons } from "@expo/vector-icons";
 import { Link, Stack, useSegments } from "expo-router";
-
-import { Image, Text, TouchableOpacity, View } from "react-native";
+import {
+  Image,
+  Text,
+  TouchableOpacity,
+  View,
+  useColorScheme,
+} from "react-native";
+import { useTheme } from "react-native-paper";
 
 import chats from "../../../assets/data/chats.json";
-import Colors from "../../../constants/Colors";
 
 export default function ChatsLayout() {
+  const { colors } = useTheme();
+  const colorScheme = useColorScheme();
+
+  const isDark = colorScheme === "dark";
+
   return (
-    <Stack>
+    <Stack
+      screenOptions={{
+        statusBarStyle: isDark ? "light" : "dark",
+        statusBarColor: colors.background,
+        navigationBarColor: colors.background,
+      }}
+    >
       {/* =========================
           CHAT LIST
       ========================= */}
@@ -17,19 +33,22 @@ export default function ChatsLayout() {
         name="index"
         options={{
           title: "Chats",
-          headerLargeTitle: true,
-          headerTransparent: true,
-          headerBlurEffect: "regular",
 
-          headerLeft: () => (
-            <TouchableOpacity>
-              <Ionicons
-                name="ellipsis-horizontal-circle-outline"
-                color={Colors.primary}
-                size={30}
-              />
-            </TouchableOpacity>
-          ),
+          headerLargeTitle: true,
+
+          headerTransparent: false,
+
+          headerStyle: {
+            backgroundColor: colors.background,
+          },
+
+          headerTintColor: colors.onSurface,
+
+          headerLargeTitleStyle: {
+            fontSize: 34,
+            fontWeight: "700",
+            color: colors.onSurface,
+          },
 
           headerRight: () => (
             <View
@@ -41,7 +60,7 @@ export default function ChatsLayout() {
               <TouchableOpacity>
                 <Ionicons
                   name="camera-outline"
-                  color={Colors.primary}
+                  color={colors.primary}
                   size={30}
                 />
               </TouchableOpacity>
@@ -50,7 +69,7 @@ export default function ChatsLayout() {
                 <TouchableOpacity>
                   <Ionicons
                     name="add-circle"
-                    color={Colors.primary}
+                    color={colors.primary}
                     size={30}
                   />
                 </TouchableOpacity>
@@ -58,12 +77,12 @@ export default function ChatsLayout() {
             </View>
           ),
 
-          headerStyle: {
-            backgroundColor: "#fff",
-          },
-
           headerSearchBarOptions: {
             placeholder: "Search",
+            textColor: colors.onSurface,
+            hintTextColor: colors.onSurfaceVariant,
+            headerIconColor: colors.primary,
+            barTintColor: colors.surface,
           },
         }}
       />
@@ -81,8 +100,10 @@ export default function ChatsLayout() {
           headerTitle: () => <ChatHeader />,
 
           headerStyle: {
-            backgroundColor: Colors.background,
+            backgroundColor: colors.background,
           },
+
+          headerTintColor: colors.onSurface,
         }}
       />
 
@@ -94,11 +115,14 @@ export default function ChatsLayout() {
         name="info/[id]"
         options={{
           title: "Info",
+
           headerBackTitleVisible: false,
 
           headerStyle: {
-            backgroundColor: Colors.background,
+            backgroundColor: colors.background,
           },
+
+          headerTintColor: colors.onSurface,
         }}
       />
     </Stack>
@@ -110,6 +134,8 @@ export default function ChatsLayout() {
 ================================= */
 
 function ChatHeader() {
+  const { colors } = useTheme();
+
   const segments = useSegments();
 
   const id = segments[segments.length - 1];
@@ -147,7 +173,7 @@ function ChatHeader() {
           style={{
             fontSize: 16,
             fontWeight: "600",
-            color: "#000",
+            color: colors.onSurface,
           }}
         >
           {otherUser?.display_name || "User"}

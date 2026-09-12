@@ -1,12 +1,16 @@
 import AppleStyleSwipeableRow from "./AppleStyleSwipeableRow";
-import Colors from "../constants/Colors";
 
 import { format } from "date-fns";
+
 import { Link } from "expo-router";
 
-import { View, Text, Image, TouchableHighlight } from "react-native";
+import { Image, Text, TouchableHighlight, View } from "react-native";
+
+import { useTheme } from "react-native-paper";
 
 export default function ChatRow({ chat }) {
+  const { colors } = useTheme();
+
   // Temporary logged-in user for frontend testing
   const currentUserId = 101;
 
@@ -24,7 +28,7 @@ export default function ChatRow({ chat }) {
       <Link href={`/(tabs)/chats/${chat.chat_id}`} asChild>
         <TouchableHighlight
           activeOpacity={0.8}
-          underlayColor={Colors.lightGray}
+          underlayColor={colors.surfaceVariant}
         >
           <View
             style={{
@@ -34,6 +38,7 @@ export default function ChatRow({ chat }) {
               paddingLeft: 20,
               paddingVertical: 10,
               marginTop: 10,
+              backgroundColor: colors.background,
             }}
           >
             <Image
@@ -50,6 +55,7 @@ export default function ChatRow({ chat }) {
                 style={{
                   fontSize: 18,
                   fontWeight: "bold",
+                  color: colors.onSurface,
                 }}
               >
                 {otherUser.display_name}
@@ -58,7 +64,7 @@ export default function ChatRow({ chat }) {
               <Text
                 style={{
                   fontSize: 16,
-                  color: Colors.gray,
+                  color: colors.onSurfaceVariant,
                 }}
                 numberOfLines={1}
               >
@@ -70,7 +76,7 @@ export default function ChatRow({ chat }) {
 
             <Text
               style={{
-                color: Colors.gray,
+                color: colors.onSurfaceVariant,
                 paddingRight: 20,
                 alignSelf: "flex-start",
               }}
