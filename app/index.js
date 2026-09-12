@@ -2,11 +2,7 @@ import { Redirect } from "expo-router";
 
 import { useEffect, useState } from "react";
 
-import {
-  ActivityIndicator,
-  StyleSheet,
-  View,
-} from "react-native";
+import { ActivityIndicator, StyleSheet, View } from "react-native";
 
 import * as SecureStore from "expo-secure-store";
 
@@ -46,7 +42,7 @@ export default function Index() {
   }
 
   if (hasSession) {
-    return <Redirect href="/chat" />;
+    return <Redirect href="/chats" />;
   }
 
   return <Redirect href="/welcome" />;

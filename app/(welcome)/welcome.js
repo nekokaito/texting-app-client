@@ -10,7 +10,7 @@ import {
   useColorScheme,
 } from "react-native";
 
-const welcomeImage = require("../assets/images/icon.png");
+const welcomeImage = require("../../assets/images/icon.png");
 
 export default function WelcomeScreen() {
   const router = useRouter();

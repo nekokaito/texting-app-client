@@ -2,6 +2,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import { useState } from "react";
 import {
+  ActivityIndicator,
   Alert,
   KeyboardAvoidingView,
   Platform,
@@ -12,7 +13,6 @@ import {
 } from "react-native";
 import MaskInput from "react-native-mask-input";
 import { useTheme } from "react-native-paper";
-
 import { API_URL } from "../../constants/API";
 
 const BD_PHONE = [
@@ -35,45 +35,72 @@ const BD_PHONE = [
 
 const PhoneNumberScreen = () => {
   const [phoneNumber, setPhoneNumber] = useState("");
+  const [loading, setLoading] = useState(false);
 
   const router = useRouter();
-
   const { colors } = useTheme();
 
   const isValid = phoneNumber.length >= 15;
 
+  const handleBack = () => {
+    router.replace("/welcome");
+  };
+
   const handleNext = async () => {
-    if (!isValid) return;
+    if (!isValid || loading) return;
+
+    setLoading(true);
 
     try {
       const cleanPhoneNumber = phoneNumber.replace(/\s/g, "");
 
-      const response = await fetch(`${API_URL}/api/auth/send-otp`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          phoneNumber: cleanPhoneNumber,
-        }),
-      });
+      const checkResponse = await fetch(
+        `${API_URL}/api/auth/check-phone`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            phoneNumber: cleanPhoneNumber,
+          }),
+        }
+      );
 
-      const data = await response.json();
+      const checkData = await checkResponse.json();
 
-      if (!response.ok) {
-        throw new Error(data.message || "Unable to send OTP");
+      if (!checkResponse.ok) {
+        throw new Error(
+          checkData.message || "Unable to check phone number"
+        );
+      }
+
+      if (checkData.exists === true) {
+        router.push({
+          pathname: "/login/password",
+          params: {
+            phone: cleanPhoneNumber,
+          },
+        });
+
+        return;
       }
 
       router.push({
-        pathname: "/otp",
+        pathname: "/register/name",
         params: {
           phone: cleanPhoneNumber,
         },
       });
     } catch (error) {
-      console.log("Send OTP error:", error);
+      console.log("Phone check error:", error);
 
-      Alert.alert("Unable to send OTP", error.message || "Please try again.");
+      Alert.alert(
+        "Unable to continue",
+        error.message || "Please try again."
+      );
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -88,11 +115,17 @@ const PhoneNumberScreen = () => {
       behavior={Platform.OS === "ios" ? "padding" : undefined}
     >
       <View style={styles.container}>
-        {/* Header */}
-
         <View style={styles.header}>
-          <TouchableOpacity onPress={() => router.back()}>
-            <Ionicons name="arrow-back" size={26} color={colors.primary} />
+          <TouchableOpacity
+            onPress={handleBack}
+            disabled={loading}
+            activeOpacity={0.7}
+          >
+            <Ionicons
+              name="arrow-back"
+              size={26}
+              color={colors.primary}
+            />
           </TouchableOpacity>
 
           <Text
@@ -109,8 +142,6 @@ const PhoneNumberScreen = () => {
           <View style={{ width: 26 }} />
         </View>
 
-        {/* Description */}
-
         <Text
           style={[
             styles.description,
@@ -119,10 +150,9 @@ const PhoneNumberScreen = () => {
             },
           ]}
         >
-          Please enter your phone number. We will use it to verify your account.
+          Please enter your phone number. We will use it to verify your
+          account.
         </Text>
-
-        {/* Phone Input */}
 
         <View
           style={[
@@ -132,7 +162,11 @@ const PhoneNumberScreen = () => {
             },
           ]}
         >
-          <TouchableOpacity style={styles.countryRow}>
+          <TouchableOpacity
+            style={styles.countryRow}
+            disabled={loading}
+            activeOpacity={0.7}
+          >
             <Text
               style={[
                 styles.countryName,
@@ -177,6 +211,7 @@ const PhoneNumberScreen = () => {
             value={phoneNumber}
             keyboardType="phone-pad"
             autoFocus
+            editable={!loading}
             placeholder="+880 1XXXXXXXXX"
             placeholderTextColor={colors.onSurfaceVariant}
             onChangeText={(masked) => {
@@ -192,8 +227,6 @@ const PhoneNumberScreen = () => {
           />
         </View>
 
-        {/* Information */}
-
         <Text
           style={[
             styles.info,
@@ -202,11 +235,9 @@ const PhoneNumberScreen = () => {
             },
           ]}
         >
-          Make sure you enter a phone number that you can receive SMS messages
-          on.
+          Make sure you enter a phone number that you can receive SMS
+          messages on.
         </Text>
-
-        {/* Bottom Section */}
 
         <View style={styles.bottom}>
           <Text
@@ -244,27 +275,37 @@ const PhoneNumberScreen = () => {
 
           <TouchableOpacity
             activeOpacity={0.8}
-            disabled={!isValid}
+            disabled={!isValid || loading}
             onPress={handleNext}
             style={[
               styles.button,
               {
-                backgroundColor: isValid
-                  ? colors.primary
-                  : colors.surfaceVariant,
+                backgroundColor:
+                  isValid && !loading
+                    ? colors.primary
+                    : colors.surfaceVariant,
               },
             ]}
           >
-            <Text
-              style={[
-                styles.buttonText,
-                {
-                  color: isValid ? colors.onPrimary : colors.onSurfaceVariant,
-                },
-              ]}
-            >
-              Next
-            </Text>
+            {loading ? (
+              <ActivityIndicator
+                size="small"
+                color={colors.onPrimary}
+              />
+            ) : (
+              <Text
+                style={[
+                  styles.buttonText,
+                  {
+                    color: isValid
+                      ? colors.onPrimary
+                      : colors.onSurfaceVariant,
+                  },
+                ]}
+              >
+                Next
+              </Text>
+            )}
           </TouchableOpacity>
         </View>
       </View>
@@ -387,3 +428,4 @@ const styles = StyleSheet.create({
 });
 
 export default PhoneNumberScreen;
+

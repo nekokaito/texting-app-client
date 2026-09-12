@@ -1,34 +1,37 @@
 import { Stack, useLocalSearchParams, useRouter } from "expo-router";
-
+import * as SecureStore from "expo-secure-store";
 import { useEffect, useState } from "react";
-
-import { Alert, StyleSheet, Text, TouchableOpacity, View } from "react-native";
-
+import {
+  ActivityIndicator,
+  Alert,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
 import {
   CodeField,
   Cursor,
   useBlurOnFulfill,
   useClearByFocusCell,
 } from "react-native-confirmation-code-field";
-
 import { useTheme } from "react-native-paper";
-
 import { API_URL } from "../../constants/API";
 
 const CELL_COUNT = 6;
-
-console.log("API_URL:", API_URL);
+const SESSION_KEY = "user_session";
 
 export default function OTP() {
-  const { phone } = useLocalSearchParams();
+  const { phone, purpose, fullName, username, password } =
+    useLocalSearchParams();
 
   const router = useRouter();
-
   const { colors } = useTheme();
 
   const cleanPhoneNumber = phone ? phone.replace(/\s/g, "") : "";
 
-  console.log("Phone number from params:", cleanPhoneNumber);
+  const otpPurpose =
+    purpose === "LOGIN" || purpose === "REGISTRATION" ? purpose : null;
 
   const [code, setCode] = useState("");
   const [loading, setLoading] = useState(false);
@@ -43,44 +46,81 @@ export default function OTP() {
     setValue: setCode,
   });
 
-  // Verify OTP when 6 digits are entered
   useEffect(() => {
-    if (code.length === CELL_COUNT) {
+    if (code.length === CELL_COUNT && !loading) {
       verifyCode();
     }
   }, [code]);
 
-  // Verify OTP
+  const saveSession = async (data) => {
+    if (!data.token) {
+      throw new Error("Authentication token was not received");
+    }
+
+    const session = {
+      token: data.token,
+      user: data.user || null,
+    };
+
+    await SecureStore.setItemAsync(SESSION_KEY, JSON.stringify(session));
+  };
+
   const verifyCode = async () => {
-    if (loading || !cleanPhoneNumber || code.length !== CELL_COUNT) {
+    if (
+      loading ||
+      !cleanPhoneNumber ||
+      !otpPurpose ||
+      code.length !== CELL_COUNT
+    ) {
       return;
     }
 
-    try {
-      setLoading(true);
+    setLoading(true);
 
-      const response = await fetch(`${API_URL}/api/auth/verify-otp`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          phoneNumber: cleanPhoneNumber,
-          otp: code,
-        }),
-      });
+    try {
+      let response;
+
+      if (otpPurpose === "REGISTRATION") {
+        response = await fetch(`${API_URL}/api/auth/register`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            phoneNumber: cleanPhoneNumber,
+            fullName,
+            username,
+            password,
+            otp: code,
+          }),
+        });
+      } else {
+        response = await fetch(`${API_URL}/api/auth/login`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            identifier: cleanPhoneNumber,
+            password,
+            otp: code,
+          }),
+        });
+      }
 
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.error || "Invalid or expired OTP");
+        throw new Error(
+          data.message || data.error || "Invalid or expired verification code",
+        );
       }
 
-      console.log("OTP verified successfully");
+      await saveSession(data);
 
       router.replace("/chats");
     } catch (error) {
-      console.log("Verification error:", error);
+      console.log("OTP verification error:", error);
 
       setCode("");
 
@@ -93,15 +133,14 @@ export default function OTP() {
     }
   };
 
-  // Resend OTP
   const resendCode = async () => {
-    if (loading || !cleanPhoneNumber) {
+    if (loading || !cleanPhoneNumber || !otpPurpose) {
       return;
     }
 
-    try {
-      setLoading(true);
+    setLoading(true);
 
+    try {
       const response = await fetch(`${API_URL}/api/auth/send-otp`, {
         method: "POST",
         headers: {
@@ -109,13 +148,14 @@ export default function OTP() {
         },
         body: JSON.stringify({
           phoneNumber: cleanPhoneNumber,
+          purpose: otpPurpose,
         }),
       });
 
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.error || "Unable to resend OTP");
+        throw new Error(data.message || data.error || "Unable to resend OTP");
       }
 
       setCode("");
@@ -144,7 +184,7 @@ export default function OTP() {
     >
       <Stack.Screen
         options={{
-          title: phone || "Verify Phone",
+          title: "Verify Phone",
           headerStyle: {
             backgroundColor: colors.background,
           },
@@ -182,8 +222,7 @@ export default function OTP() {
           },
         ]}
       >
-        To complete your phone number verification, please enter the 6-digit
-        activation code.
+        Enter the 6-digit verification code to continue.
       </Text>
 
       <CodeField
@@ -229,20 +268,22 @@ export default function OTP() {
         style={styles.resendButton}
         onPress={resendCode}
         disabled={loading}
+        activeOpacity={0.7}
       >
-        <Text
-          style={[
-            styles.resendText,
-            {
-              color: colors.primary,
-            },
-            loading && styles.disabledText,
-          ]}
-        >
-          {loading
-            ? "Please wait..."
-            : "Didn't receive a verification code? Resend"}
-        </Text>
+        {loading ? (
+          <ActivityIndicator size="small" color={colors.primary} />
+        ) : (
+          <Text
+            style={[
+              styles.resendText,
+              {
+                color: colors.primary,
+              },
+            ]}
+          >
+            Didn&apos;t receive a verification code? Resend
+          </Text>
+        )}
       </TouchableOpacity>
     </View>
   );
@@ -293,14 +334,11 @@ const styles = StyleSheet.create({
     width: "100%",
     alignItems: "center",
     marginTop: 20,
+    minHeight: 24,
   },
 
   resendText: {
     fontSize: 17,
     textAlign: "center",
-  },
-
-  disabledText: {
-    opacity: 0.5,
   },
 });
