@@ -161,6 +161,11 @@ export default function SettingsPage() {
             />
           </View>
 
+          <Button
+            title="Media Test"
+            onPress={() => router.push("/media-document-test")}
+          />
+
           <TouchableOpacity
             activeOpacity={0.7}
             onPress={() => setLogoutVisible(true)}
