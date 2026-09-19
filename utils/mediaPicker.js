@@ -33,19 +33,21 @@ export const pickDocument = async () => {
   const result = await DocumentPicker.getDocumentAsync({
     type: "*/*",
     copyToCacheDirectory: true,
+    multiple: false,
   });
 
-  if (result.canceled) {
+  if (result.canceled || !result.assets?.length) {
     return null;
   }
 
-  const file = result.assets[0];
+  const asset = result.assets[0];
 
   return {
-    uri: file.uri,
-    fileName: file.name,
-    mimeType: file.mimeType,
-    fileSize: file.size,
+    uri: asset.uri,
+    file: asset.file ?? null,
+    fileName: asset.name,
+    mimeType: asset.mimeType || "application/octet-stream",
+    fileSize: asset.size || 0,
     type: "document",
   };
 };

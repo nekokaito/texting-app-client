@@ -19,7 +19,8 @@ import { API_URL } from "../../../constants/API";
 
 const RegisterPasswordScreen = () => {
   const router = useRouter();
-  const { phone, fullName, username } = useLocalSearchParams();
+  const { phone, fullName, username, email, profilePicture } =
+    useLocalSearchParams();
   const { colors } = useTheme();
 
   const [password, setPassword] = useState("");
@@ -68,6 +69,8 @@ const RegisterPasswordScreen = () => {
           fullName,
           username,
           password,
+          email,
+          profilePicture,
           purpose: "REGISTRATION",
         },
       });

@@ -10,10 +10,10 @@ export default function MediaDocumentTest() {
 
   const handlePickDocument = async () => {
     try {
-      setUploading(true);
-
+      // Open the picker first
       const selectedFile = await pickDocument();
 
+      // User cancelled the picker
       if (!selectedFile) {
         return;
       }
@@ -21,7 +21,9 @@ export default function MediaDocumentTest() {
       console.log("Selected document:", selectedFile);
 
       setFile(selectedFile);
+      setUploading(true);
 
+      // Upload the selected document
       const result = await uploadToCloudinary(selectedFile);
 
       console.log("Cloudinary document result:", result);
@@ -58,7 +60,13 @@ export default function MediaDocumentTest() {
             alignItems: "center",
           }}
         >
-          <Text style={{ fontSize: 16, fontWeight: "600" }}>
+          <Text
+            style={{
+              fontSize: 16,
+              fontWeight: "600",
+              textAlign: "center",
+            }}
+          >
             {file.fileName}
           </Text>
 

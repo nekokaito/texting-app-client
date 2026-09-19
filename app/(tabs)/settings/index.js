@@ -162,8 +162,14 @@ export default function SettingsPage() {
           </View>
 
           <Button
-            title="Media Test"
+            style={styles.mediaButton}
+            title="Upload document test"
             onPress={() => router.push("/media-document-test")}
+          />
+          <Button
+            style={styles.mediaButton}
+            title="Upload photo/video test"
+            onPress={() => router.push("/media-test")}
           />
 
           <TouchableOpacity
@@ -219,5 +225,13 @@ const styles = StyleSheet.create({
     fontSize: 18,
     textAlign: "center",
     paddingVertical: 14,
+  },
+  mediaButton: {
+    marginTop: 20,
+    paddingVertical: 12,
+    color: Colors.white,
+    backgroundColor: Colors.primary,
+    borderRadius: 8,
+    textAlign: "center",
   },
 });

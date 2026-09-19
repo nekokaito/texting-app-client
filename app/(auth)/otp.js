@@ -22,8 +22,18 @@ const CELL_COUNT = 6;
 const SESSION_KEY = "user_session";
 
 export default function OTP() {
-  const { phone, purpose, fullName, username, password } =
-    useLocalSearchParams();
+  const {
+    phone,
+    purpose,
+    fullName,
+    username,
+    email,
+    profilePicture,
+    password,
+  } = useLocalSearchParams();
+
+  console.log(profilePicture);
+  console.log(email);
 
   const router = useRouter();
   const { colors } = useTheme();
@@ -90,6 +100,8 @@ export default function OTP() {
             phoneNumber: cleanPhoneNumber,
             fullName,
             username,
+            email,
+            profilePicture: profilePicture || null,
             password,
             otp: code,
           }),
