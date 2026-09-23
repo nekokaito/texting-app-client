@@ -9,7 +9,9 @@ import * as SecureStore from "expo-secure-store";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   ActivityIndicator,
+  Alert,
   Linking,
+  Pressable,
   RefreshControl,
   SectionList,
   StyleSheet,
@@ -290,20 +292,61 @@ export default function ContactsPage() {
   /*
    * Open registered user's chat.
    */
-  const openRegisteredContact = (contact) => {
-    const user = contact.user;
+  const openRegisteredContact = async (contact) => {
+    try {
+      const user = contact.user;
 
-    if (!user?.CONTACT_USER_ID) {
-      return;
+      const recipientId =
+        user?.CONTACT_USER_ID ??
+        user?.USER_ID ??
+        user?.userId ??
+        user?.user_id ??
+        user?.id;
+
+      if (!recipientId) {
+        Alert.alert("Error", "Could not find this user's ID.");
+        return;
+      }
+
+      const token = await getToken();
+
+      if (!token) {
+        Alert.alert("Session expired", "Please log in again to send messages.");
+        return;
+      }
+
+      const response = await fetch(`${API_URL}/api/chats`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          recipientId: Number(recipientId),
+        }),
+      });
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(result.error || "Could not open chat.");
+      }
+
+      const chatId = result.chatId ?? result.CHAT_ID;
+
+      if (!chatId) {
+        throw new Error("The server did not return a chat ID.");
+      }
+
+      router.push(`/chats/${chatId}`);
+    } catch (err) {
+      console.error("Open chat error:", err);
+
+      Alert.alert(
+        "Unable to open chat",
+        err.message || "Something went wrong. Please try again.",
+      );
     }
-
-    router.push({
-      pathname: "/chat",
-      params: {
-        userId: String(user.CONTACT_USER_ID),
-        username: user.USERNAME || contact.name,
-      },
-    });
   };
 
   /*
@@ -343,9 +386,6 @@ export default function ContactsPage() {
       (contact) => !contact.registered,
     );
 
-    console.log("DEVICE CONTACTS:", unregisteredContacts);
-    console.log("REGISTERED CONTACTS:", registeredContacts);
-
     const result = [];
 
     if (registeredContacts.length > 0) {
@@ -371,23 +411,10 @@ export default function ContactsPage() {
   const renderContact = ({ item }) => {
     const registeredUser = item.user;
 
-    /*
-     * Registered user's profile picture
-     * takes priority.
-     */
+    // Registered user's profile picture takes priority.
     const imageUri = registeredUser?.PROFILE_PICTURE || item.imageUri || null;
 
-    /*
-     * IMPORTANT:
-     *
-     * Show the name saved in the phone book.
-     *
-     * Example:
-     * Phone contact = "Mom"
-     * App username = "Fatima123"
-     *
-     * We show "Mom".
-     */
+    // Show the name saved in the phone book.
     const displayName = item.name || registeredUser?.USERNAME || "Unknown";
 
     const phone = registeredUser?.PHONE_NUMBER || item.phone || "";
@@ -395,7 +422,15 @@ export default function ContactsPage() {
 
     return (
       <>
-        <View style={styles.contactRow}>
+        <Pressable
+          style={styles.contactRow}
+          onPress={() => {
+            if (item.registered) {
+              openRegisteredContact(item);
+            }
+          }}
+          disabled={!item.registered}
+        >
           {imageUri ? (
             <Avatar.Image size={52} source={{ uri: imageUri }} />
           ) : (
@@ -428,9 +463,7 @@ export default function ContactsPage() {
                 },
               ]}
             >
-              {item.registered && username
-                ? `@${username}  •  ${phone}`
-                : phone}
+              {item.registered && username ? `@${username} • ${phone}` : phone}
             </Text>
           </View>
 
@@ -452,7 +485,7 @@ export default function ContactsPage() {
               Invite
             </Button>
           )}
-        </View>
+        </Pressable>
 
         <Divider style={styles.divider} />
       </>
